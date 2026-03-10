@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,72 +40,74 @@ private fun AuthScreen(
     onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = "Вход")
-
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-            value = state.email,
-            onValueChange = { onEvent(AuthEvent.EmailChanged(it)) },
-            label = { Text("Email") },
-            singleLine = true,
-            enabled = !state.isLoading,
-        )
-
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
-            value = state.password,
-            onValueChange = { onEvent(AuthEvent.PasswordChanged(it)) },
-            label = { Text("Пароль") },
-            singleLine = true,
-            enabled = !state.isLoading,
-            visualTransformation = PasswordVisualTransformation(),
-        )
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-            onClick = { onEvent(AuthEvent.LoginClicked) },
-            enabled = state.canSubmit && !state.isLoading,
+    Scaffold { p ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(p)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .padding(4.dp),
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Text("Войти")
-            }
-        }
+            Text(text = "Вход")
 
-        if (state.errorMessage != null) {
-            Text(
-                text = state.errorMessage,
-                modifier = Modifier.padding(top = 16.dp),
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                value = state.email,
+                onValueChange = { onEvent(AuthEvent.EmailChanged(it)) },
+                label = { Text("Email") },
+                singleLine = true,
+                enabled = !state.isLoading,
             )
-        }
 
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-            onClick = onNavigateToRegister,
-            enabled = !state.isLoading,
-        ) {
-            Text("Создать аккаунт")
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                value = state.password,
+                onValueChange = { onEvent(AuthEvent.PasswordChanged(it)) },
+                label = { Text("Пароль") },
+                singleLine = true,
+                enabled = !state.isLoading,
+                visualTransformation = PasswordVisualTransformation(),
+            )
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                onClick = { onEvent(AuthEvent.LoginClicked) },
+                enabled = state.canSubmit && !state.isLoading,
+            ) {
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(4.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text("Войти")
+                }
+            }
+
+            if (state.errorMessage != null) {
+                Text(
+                    text = state.errorMessage,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+            }
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                onClick = onNavigateToRegister,
+                enabled = !state.isLoading,
+            ) {
+                Text("Создать аккаунт")
+            }
         }
     }
 }
-
