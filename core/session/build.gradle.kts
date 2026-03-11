@@ -1,14 +1,14 @@
 plugins {
     id("android.fruits.library")
-    id("tech.fruits.ktor")
     id("tech.fruits.koin")
     id("android.fruits.test")
 }
 
 android {
-    namespace = "com.fruits.network"
+    namespace = "com.fruits.session"
 }
 
-dependencies{
+dependencies {
     implementation(projects.core.domain)
+    implementation(projects.core.data.repository)
 }

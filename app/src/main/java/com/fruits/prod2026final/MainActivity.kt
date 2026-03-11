@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.fruits.prod2026final.navigation.AppNavGraph
+import com.fruits.prod2026final.presentation.AppRoot
 import com.fruits.prod2026final.ui.theme.PROD2026finalTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PROD2026finalTheme {
-                AppNavGraph()
+                AppRoot()
             }
         }
     }

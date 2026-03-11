@@ -9,7 +9,7 @@ android {
 }
 
 dependencies{
-    implementation(project(":core:data:network"))
-    implementation(project(":core:data:database"))
-    implementation(project(":core:domain"))
+    implementation(projects.core.data.network)
+    implementation(projects.core.data.database)
+    implementation(projects.core.domain)
 }
