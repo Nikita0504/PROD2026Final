@@ -13,6 +13,12 @@ val libs = extensions
     .getByType<VersionCatalogsExtension>()
     .named("libs")
 
+android {
+    defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+    }
+}
+
 dependencies {
     "implementation"(libs.findLibrary("navigation-compose").get())
     "implementation"(libs.findLibrary("lifecycle-viewmodel-compose").get())
