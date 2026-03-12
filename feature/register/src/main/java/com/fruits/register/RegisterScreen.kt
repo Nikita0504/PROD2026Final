@@ -17,12 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterRoute(
     onNavigateBackToAuth: () -> Unit,
-    viewModel: RegisterViewModel = viewModel(),
+    viewModel: RegisterViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -55,6 +55,28 @@ private fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp),
+                value = state.firstName,
+                onValueChange = { onEvent(RegisterEvent.FirstNameChanged(it)) },
+                label = { Text("Имя") },
+                singleLine = true,
+                enabled = !state.isLoading,
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                value = state.secondName,
+                onValueChange = { onEvent(RegisterEvent.SecondNameChanged(it)) },
+                label = { Text("Фамилия") },
+                singleLine = true,
+                enabled = !state.isLoading,
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
                 value = state.email,
                 onValueChange = { onEvent(RegisterEvent.EmailChanged(it)) },
                 label = { Text("Email") },

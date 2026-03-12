@@ -28,8 +28,8 @@ class UserNetworkRepositoryImpl(
         service.login(UserLoginSchema(email, password))
             .mapResult { it.toDomain() }
 
-    override suspend fun getProfile(): Result<User> =
-        service.getProfile().mapResult { it.toDomain() }
+    override suspend fun getProfile(accessToken: String): Result<User> =
+        service.getProfile(accessToken).mapResult { it.toDomain() }
 
     override suspend fun refreshToken(refreshToken: String): Result<Tokens> =
         service.refreshToken(refreshToken).mapResult { it.toDomain() }

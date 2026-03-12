@@ -6,6 +6,7 @@ import com.fruits.database.di.databaseModule
 import com.fruits.network.di.networkModule
 import com.fruits.prod2026final.di.appModule
 import com.fruits.repository.di.authRepositoryModule
+import com.fruits.register.di.registerModule
 import com.fruits.session.sessionModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -21,7 +22,8 @@ class ProdApplication : Application() {
                 authRepositoryModule,
                 sessionModule,
                 appModule,
-                authModule
+                authModule,
+                registerModule,
             )
         }
     }

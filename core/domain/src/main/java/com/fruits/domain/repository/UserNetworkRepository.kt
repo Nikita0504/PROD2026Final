@@ -14,7 +14,7 @@ interface UserNetworkRepository {
     ): Result<AuthResult>
 
     suspend fun login(email: String, password: String): Result<Tokens>
-    suspend fun getProfile(): Result<User>
+    suspend fun getProfile(accessToken: String): Result<User>
 
     suspend fun refreshToken(refreshToken: String): Result<Tokens>
 }

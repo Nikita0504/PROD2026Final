@@ -7,6 +7,10 @@ plugins {
 
 android {
     namespace = "com.fruits.network"
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies{

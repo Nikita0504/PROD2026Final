@@ -7,6 +7,7 @@ import com.fruits.network.user.schema.UserLoginSchema
 import com.fruits.network.user.schema.UserReadSchema
 import com.fruits.network.user.schema.UserRegisterSchema
 import com.fruits.network.util.ApiResult
+import com.fruits.network.util.safeCall
 import com.fruits.network.util.toApiResult
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -18,14 +19,15 @@ class UserService(
 
     private val baseUrl = "/api/v1/users"
 
-    suspend fun register(body: UserCreateSchema): ApiResult<UserRegisterSchema> =
+    suspend fun register(body: UserCreateSchema): ApiResult<UserRegisterSchema> = safeCall {
         client.post("$baseUrl/auth/register") {
             jsonBody(body)
         }.toApiResult(
             409 to "Пользователь с таким email уже зарегистрирован"
         )
+    }
 
-    suspend fun login(body: UserLoginSchema): ApiResult<TokenReadSchema> =
+    suspend fun login(body: UserLoginSchema): ApiResult<TokenReadSchema> = safeCall {
         client.post("$baseUrl/auth/login") {
             jsonBody(body)
         }.toApiResult(
@@ -33,23 +35,24 @@ class UserService(
             404 to "Пользователь с таким email не найден",
             422 to "Ошибка валидации данных"
         )
+    }
 
-    suspend fun refreshToken(refreshToken: String): ApiResult<TokenReadSchema> =
+    suspend fun refreshToken(refreshToken: String): ApiResult<TokenReadSchema> = safeCall{
         client.post("$baseUrl/users/token/refresh") {
             jsonBody(RefreshTokenSchema(refreshToken))
         }.toApiResult(
             401 to "Refresh токен недействителен",
 
-        )
-
-
-    suspend fun getProfile(): ApiResult<UserReadSchema> =
-        client.get("$baseUrl/profile")
-            .toApiResult(
-                401 to "Пользователь не авторизован"
             )
+    }
 
-    // --- Private extension ---
+    suspend fun getProfile(accessToken: String): ApiResult<UserReadSchema> = safeCall {
+        client.get("$baseUrl/profile") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }.toApiResult(
+            401 to "Пользователь не авторизован"
+        )
+    }
 
     private inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
         contentType(ContentType.Application.Json)
