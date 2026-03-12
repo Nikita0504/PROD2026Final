@@ -2,6 +2,8 @@ package com.fruits.prod2026final
 
 import android.app.Application
 import com.fruits.auth.di.authModule
+import com.fruits.database.di.databaseModule
+import com.fruits.network.di.networkModule
 import com.fruits.prod2026final.di.appModule
 import com.fruits.repository.di.authRepositoryModule
 import com.fruits.session.sessionModule
@@ -13,7 +15,14 @@ class ProdApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@ProdApplication)
-            modules(authRepositoryModule, sessionModule, appModule, authModule)
+            modules(
+                databaseModule,
+                networkModule,
+                authRepositoryModule,
+                sessionModule,
+                appModule,
+                authModule
+            )
         }
     }
 }

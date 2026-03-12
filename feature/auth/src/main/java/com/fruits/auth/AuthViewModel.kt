@@ -3,7 +3,6 @@ package com.fruits.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.session.SessionManager
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,9 +30,13 @@ class AuthViewModel(
         _state.update { it.copy(isLoading = true, errorMessage = null) }
 
         viewModelScope.launch {
-            delay(1000L)
-            _state.update { it.copy(isLoading = false, errorMessage = null) }
-            sessionManager.markAuthorized()
+            val result = sessionManager.login(current.email, current.password)
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = result.exceptionOrNull()?.message
+                )
+            }
         }
     }
 }

@@ -17,9 +17,12 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
     implementation(libs.koin.compose.viewmodel)
+
     implementation(projects.core.navigation)
     implementation(projects.core.session)
     implementation(projects.core.data.repository)
+    implementation(projects.core.data.network)
+    implementation(projects.core.data.database)
     implementation(projects.feature.auth)
     implementation(projects.feature.register)
     implementation(projects.core.domain)
