@@ -8,3 +8,7 @@ plugins {
 android {
     namespace = "com.fruits.network"
 }
+
+dependencies{
+    implementation(projects.core.domain)
+}

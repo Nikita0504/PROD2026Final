@@ -13,7 +13,6 @@ val libs = extensions
     .named("libs")
 
 room {
-    // Общая директория для всех вариантов; Room сам создаст каталог при необходимости
     schemaDirectory("$projectDir/schemas")
 }
 

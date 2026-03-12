@@ -8,3 +8,7 @@ plugins {
 android {
     namespace = "com.fruits.database"
 }
+
+dependencies{
+    implementation(libs.security.crypto)
+}
