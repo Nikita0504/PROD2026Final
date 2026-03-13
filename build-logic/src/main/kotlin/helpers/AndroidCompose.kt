@@ -23,6 +23,7 @@ internal fun Project.configureAndroidCompose(
         "androidTestImplementation"(platform(bom))
         "implementation"(libs.findLibrary("navigation-compose").get())
         "implementation"(libs.findBundle("compose-core").get())
+        "implementation"(libs.findBundle("async-image").get())
         "debugImplementation"(libs.findLibrary("compose-ui-tooling").get())
         "debugImplementation"(libs.findLibrary("compose-ui-test-manifest").get())
     }

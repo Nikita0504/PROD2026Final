@@ -214,6 +214,10 @@ compose-core = [
     "lifecycle-runtime-compose",
     "lifecycle-viewmodel-compose",
 ]
+async-image = [
+    "coil-compose",
+    "coil-network-okhttp",
+]
 ktor-client = [
     "ktor-client-core",
     "ktor-client-android",
