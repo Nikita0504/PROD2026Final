@@ -26,8 +26,11 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fruits.chat.chatScreen
 import com.fruits.navigation.Route
 import com.fruits.navigation.TopLevelRoutes
+import com.fruits.profile.profileScreen
+import com.fruits.tape.tapeScreen
 
 @Composable
 fun MainNavGraph() {
