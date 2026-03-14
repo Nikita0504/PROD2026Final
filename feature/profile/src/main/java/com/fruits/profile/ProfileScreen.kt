@@ -35,9 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
@@ -154,6 +156,22 @@ private fun ProfileScreen(
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Text("Предпросмотр")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { onEvent(ProfileEvent.OnLogoutClicked) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                border = ButtonDefaults.outlinedButtonBorder.copy(
+                    brush = SolidColor(MaterialTheme.colorScheme.error)
+                ),
+            ) {
+                Text(
+                    text = "Выйти из аккаунта",
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

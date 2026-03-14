@@ -13,7 +13,7 @@ interface UserDao {
     @Query("SELECT * FROM users LIMIT 1")
     suspend fun getCurrent(): UserEntity?
 
-    @Upsert  // INSERT или UPDATE — идеально для кэша
+    @Upsert
     suspend fun upsert(user: UserEntity)
 
     @Query("DELETE FROM users")

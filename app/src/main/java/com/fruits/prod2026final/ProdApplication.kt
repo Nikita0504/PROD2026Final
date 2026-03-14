@@ -1,6 +1,7 @@
 package com.fruits.prod2026final
 
 import android.app.Application
+import com.fruits.chat.di.chatModule
 import com.fruits.auth.di.authModule
 import com.fruits.database.di.databaseModule
 import com.fruits.network.di.networkModule
@@ -24,6 +25,7 @@ class ProdApplication : Application() {
                 authRepositoryModule,
                 sessionModule,
                 appModule,
+                chatModule,
                 authModule,
                 registerModule,
                 tapeModule,

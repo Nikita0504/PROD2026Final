@@ -2,6 +2,7 @@ package com.fruits.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fruits.session.SessionManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -11,7 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
@@ -34,6 +37,10 @@ class ProfileViewModel : ViewModel() {
                 viewModelScope.launch {
                     _effects.emit(ProfileEffect.ShowPreviewDialog)
                 }
+            }
+            ProfileEvent.OnLogoutClicked -> viewModelScope.launch {
+                println("logout")
+                sessionManager.logout()
             }
         }
     }

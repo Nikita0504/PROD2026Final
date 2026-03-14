@@ -17,7 +17,7 @@ fun AppRoot(
 ) {
     val sessionState by rootViewModel.sessionState.collectAsStateWithLifecycle()
 
-    when (SessionState.Authorized /*Для теста*/ ) {
+    when (sessionState) {
         SessionState.Loading -> SplashScreen()
         SessionState.Unauthorized -> AuthNavGraph()
         SessionState.Authorized -> MainNavGraph()
