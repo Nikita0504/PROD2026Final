@@ -6,6 +6,6 @@ import com.fruits.navigation.Route
 
 fun NavGraphBuilder.tapeScreen() {
     composable<Route.Tape> {
-        TapeScreen()
+        TapeRoute()
     }
 }
