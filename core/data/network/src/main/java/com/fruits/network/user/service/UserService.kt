@@ -20,14 +20,6 @@ class UserService(
 ) {
     private val baseUrl = "https://cannily-infinite-boxfish.cloudpub.ru/api/v1/users"
 
-    suspend fun register(body: UserCreateSchema): ApiResult<UserRegisterSchema> = safeCall {
-        client.post("$baseUrl/auth/register") {
-            jsonBody(body)
-        }.toApiResult(
-            409 to "Пользователь с таким email уже зарегистрирован"
-        )
-    }
-
     suspend fun login(body: UserLoginSchema): ApiResult<TokenReadSchema> = safeCall {
         Log.d("UserService", "Send login request")
         client.post("$baseUrl/auth/login") {

@@ -1,8 +1,7 @@
-package com.fruits.debug.di
+package com.fruits.debug
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.fruits.debug.DebugLogStorage
 import com.fruits.network.user.logger.NetworkEventLogger
 
 class DebugNetworkLogger : NetworkEventLogger {

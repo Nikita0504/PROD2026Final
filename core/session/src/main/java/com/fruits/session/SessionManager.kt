@@ -19,6 +19,16 @@ class SessionManager(
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Loading)
     val sessionState: StateFlow<SessionState> = _sessionState.asStateFlow()
 
+    private var previousState: SessionState = SessionState.Loading
+
+    fun toggleDebug() {
+        if (_sessionState.value is SessionState.Debug) {
+            _sessionState.value = previousState
+        } else {
+            previousState = _sessionState.value
+            _sessionState.value = SessionState.Debug
+        }
+    }
     suspend fun restoreSession() {
         _sessionState.value = SessionState.Loading
         val cachedUser = userLocalRepository.getCachedUser()

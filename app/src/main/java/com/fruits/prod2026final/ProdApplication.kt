@@ -5,6 +5,7 @@ import com.fruits.auth.di.authModule
 import com.fruits.chat.di.chatModule
 import com.fruits.database.di.databaseModule
 import com.fruits.debug.di.debugModule
+import com.fruits.debugPanel.di.debugPanelModule
 import com.fruits.network.di.networkModule
 import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
@@ -34,8 +35,8 @@ class ProdApplication : Application() {
                 imageUploadUrlRepositorModule,
                 tapeModule,
                 profileModule,
-                debugModule
-                //if (BuildConfig.DEBUG)
+                debugModule, //if (BuildConfig.DEBUG)
+                debugPanelModule
             )
         }
     }

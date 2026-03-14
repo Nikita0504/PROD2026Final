@@ -1,5 +1,6 @@
 package com.fruits.debug.di
 
+import com.fruits.debug.DebugNetworkLogger
 import com.fruits.debug.MockDataService
 import com.fruits.debug.MockStorage
 import com.fruits.network.user.logger.NetworkEventLogger
