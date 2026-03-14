@@ -49,4 +49,31 @@ class DebugPanelViewModel(
             )
         }
     }
+
+    private val _recommendationsState = MutableStateFlow(
+        mockDataService.recommendations.toEditState()
+    )
+    val recommendationsState: StateFlow<List<RecommendationMockEditState>> =
+        _recommendationsState.asStateFlow()
+
+    fun updateRecommendationState(updated: RecommendationMockEditState) {
+        _recommendationsState.value = _recommendationsState.value.map {
+            if (it.id == updated.id) updated else it
+        }
+    }
+
+    fun saveRecommendationsMock() {
+        mockDataService.updateRecommendations {
+            val states = _recommendationsState.value
+            replaceAll { rec ->
+                val state = states.find { it.id == rec.id } ?: return@replaceAll rec
+                rec.copy(
+                    authorName = state.authorName,
+                    description = state.description,
+                    likesCount = state.likesCount.toIntOrNull() ?: rec.likesCount,
+                    isLiked = state.isLiked
+                )
+            }
+        }
+    }
 }

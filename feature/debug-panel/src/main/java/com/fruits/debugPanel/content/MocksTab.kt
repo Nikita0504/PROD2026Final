@@ -20,11 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fruits.debugPanel.content.mockblock.TokensMockBlock
+import com.fruits.debugPanel.content.mockblock.UserMockBlock
 
 @Composable
 fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
     val userState by vm.userState.collectAsStateWithLifecycle()
     val tokensState by vm.tokensState.collectAsStateWithLifecycle()
+    val recommendationsState by vm.recommendationsState.collectAsStateWithLifecycle()
+
 
     Column(
         Modifier
@@ -56,6 +60,14 @@ fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
             enabled = mockEnabled,
             onStateChange = vm::updateTokensState,
             onSave = vm::saveTokensMock
+        )
+
+
+        RecommendationsMockBlock(
+            states = recommendationsState,
+            enabled = mockEnabled,
+            onStateChange = vm::updateRecommendationState,
+            onSave = vm::saveRecommendationsMock
         )
     }
 }

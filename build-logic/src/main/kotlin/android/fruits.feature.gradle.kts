@@ -24,5 +24,8 @@ dependencies {
     "implementation"(libs.findLibrary("lifecycle-viewmodel-compose").get())
     "implementation"(libs.findLibrary("lifecycle-runtime-compose").get())
     "implementation"(libs.findLibrary("compose-icons-extended").get())
+    if (project.path != ":core:navigation") {
+        "debugImplementation"(project(":core:navigation"))
+    }
 }
 

@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.navigation)
     implementation(projects.core.session)
     implementation(libs.coil.compose)
 }

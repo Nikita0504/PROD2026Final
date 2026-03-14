@@ -1,4 +1,4 @@
-package com.fruits.debugPanel.content
+package com.fruits.debugPanel.content.mockblock
 
 import com.fruits.debugPanel.UserMockEditState
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.fruits.debugPanel.content.MockEditBlock
 
 
 @Composable

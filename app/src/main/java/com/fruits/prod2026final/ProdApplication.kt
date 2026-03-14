@@ -16,7 +16,6 @@ import com.fruits.session.sessionModule
 import com.fruits.tape.di.tapeModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-import kotlin.collections.emptyList
 
 class ProdApplication : Application() {
     override fun onCreate() {
@@ -35,7 +34,7 @@ class ProdApplication : Application() {
                 imageUploadUrlRepositorModule,
                 tapeModule,
                 profileModule,
-                debugModule, //if (BuildConfig.DEBUG)
+                debugModule,
                 debugPanelModule
             )
         }

@@ -11,3 +11,11 @@ data class TokensMockEditState(
     val refreshToken: String
 )
 
+data class RecommendationMockEditState(
+    val id: String,
+    val authorName: String,
+    val description: String,
+    val likesCount: String,
+    val isLiked: Boolean
+)
+

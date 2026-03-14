@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -105,35 +107,53 @@ private fun TapeScreen(
                     .clip(RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center,
             ) {
-                val card = state.currentCard
-                if (card != null) {
-                    SwipeCard(
-                        modifier = Modifier.fillMaxSize(),
-                        state = cardState,
-                        onSwiped = {
-                            coroutineScope.launch {
-                                cardState.reset()
-                                onEvent(TapeEvent.OnCardSwiped)
-                            }
-                        },
-                    ) {
-                        TapeCardContent(
-                            name = card.name,
-                            imageUrl = card.imageUrl,
-                        )
+                when {
+                    state.isLoading -> {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
-                } else {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            "Загрузка...",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    state.error != null -> {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.errorContainer)
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "Не удалось загрузить",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Button(onClick = { onEvent(TapeEvent.OnRetry) }) {
+                                Text("Повторить")
+                            }
+                        }
+                    }
+                    state.currentCard != null -> {
+                        SwipeCard(
+                            modifier = Modifier.fillMaxSize(),
+                            state = cardState,
+                            onSwiped = {
+                                coroutineScope.launch {
+                                    cardState.reset()
+                                    onEvent(TapeEvent.OnCardSwiped)
+                                }
+                            },
+                        ) {
+                            TapeCardContent(
+                                name = state.currentCard.name,
+                                imageUrl = state.currentCard.imageUrl,
+                            )
+                        }
                     }
                 }
             }
@@ -143,7 +163,7 @@ private fun TapeScreen(
             TapeActionBar(
                 onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
                 onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
-                enabled = state.currentCard != null,
+                enabled = state.currentCard != null && !state.isLoading,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -161,7 +181,7 @@ private fun TapeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding( 24.dp)
+                    .padding(24.dp)
                     .padding(bottom = 32.dp),
             ) {
                 Text(

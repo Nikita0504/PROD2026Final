@@ -1,4 +1,4 @@
-package com.fruits.debugPanel.content
+package com.fruits.debugPanel.content.mockblock
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.fruits.debugPanel.TokensMockEditState
+import com.fruits.debugPanel.content.MockEditBlock
 
 @Composable
 fun TokensMockBlock(

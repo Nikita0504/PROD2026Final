@@ -12,5 +12,6 @@ data class RecommendationsSchema (
     @SerialName("image_url")    val imageUrl: String?,
     val description: String,
     @SerialName("likes_count")  val likesCount: Int,
-    @SerialName("is_liked")     val isLiked: Boolean
+    @SerialName("is_liked")     val isLiked: Boolean,
+    val explanation: List<String>
 )

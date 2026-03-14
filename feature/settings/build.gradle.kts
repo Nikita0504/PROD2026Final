@@ -6,6 +6,3 @@ android {
     namespace = "com.fruits.settings"
 }
 
-dependencies {
-    implementation(projects.core.navigation)
-}
