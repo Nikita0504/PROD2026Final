@@ -2,14 +2,20 @@ package com.fruits.prod2026final
 
 import android.app.Application
 import com.fruits.auth.di.authModule
+import com.fruits.chat.di.chatModule
 import com.fruits.database.di.databaseModule
+import com.fruits.debug.di.debugModule
 import com.fruits.network.di.networkModule
+import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
+import com.fruits.profile.di.profileModule
 import com.fruits.repository.di.authRepositoryModule
-import com.fruits.register.di.registerModule
+import com.fruits.repository.di.imageUploadUrlRepositorModule
 import com.fruits.session.sessionModule
+import com.fruits.tape.di.tapeModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import kotlin.collections.emptyList
 
 class ProdApplication : Application() {
     override fun onCreate() {
@@ -25,11 +31,11 @@ class ProdApplication : Application() {
                 chatModule,
                 authModule,
                 onboardingModule,
-                imageUploadUrlRepositorModule
-                registerModule,
+                imageUploadUrlRepositorModule,
                 tapeModule,
                 profileModule,
-                if (BuildConfig.DEBUG) debugModule else emptyList()
+                debugModule
+                //if (BuildConfig.DEBUG)
             )
         }
     }

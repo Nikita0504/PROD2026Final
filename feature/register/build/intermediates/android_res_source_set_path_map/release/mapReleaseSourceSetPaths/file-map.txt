@@ -1,0 +1,8 @@
+com.fruits.register-pngs-0 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/generated/res/pngs/release
+com.fruits.register-updated_navigation_xml-1 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/generated/updated_navigation_xml/release
+com.fruits.register-mergeReleaseResources-2 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+com.fruits.register-mergeReleaseResources-3 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+com.fruits.register-release-4 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/intermediates/merged_res/release/mergeReleaseResources
+com.fruits.register-release-5 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/build/intermediates/packaged_res/release/packageReleaseResources
+com.fruits.register-main-6 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/res
+com.fruits.register-release-7 /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/release/res

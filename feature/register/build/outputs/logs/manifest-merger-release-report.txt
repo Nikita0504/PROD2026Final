@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml:2:1-4:12
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml:2:1-4:12
+	package
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml:2:11-69
+uses-sdk
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/register/src/main/AndroidManifest.xml

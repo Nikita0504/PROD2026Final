@@ -34,9 +34,10 @@
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/auth" />
             <option value="$PROJECT_DIR$/feature/chat" />
-            <option value="$PROJECT_DIR$/feature/debug_panel" />
+            <option value="$PROJECT_DIR$/feature/chat-list" />
+            <option value="$PROJECT_DIR$/feature/debug-panel" />
+            <option value="$PROJECT_DIR$/feature/onboarding" />
             <option value="$PROJECT_DIR$/feature/profile" />
-            <option value="$PROJECT_DIR$/feature/register" />
             <option value="$PROJECT_DIR$/feature/settings" />
             <option value="$PROJECT_DIR$/feature/tape" />
           </set>
