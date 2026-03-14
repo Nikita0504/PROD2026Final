@@ -1,6 +1,5 @@
 package com.fruits.network.di
 
-import android.util.Log
 import com.fruits.network.user.service.UserService
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -14,6 +13,10 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
+import com.fruits.network.images.service.ImageUploadService
+import com.fruits.network.recommendations.service.RecommendationsService
+import com.fruits.network.util.NetworkEventLogger
+import com.fruits.network.util.NoOpNetworkLogger
 import com.fruits.network.images.service.ImageService
 import com.fruits.network.user.logger.NetworkEventLogger
 import com.fruits.network.user.logger.NoOpNetworkLogger
@@ -63,7 +66,6 @@ val networkModule = module {
                 logger = object : io.ktor.client.plugins.logging.Logger {
                     override fun log(message: String) {
                         eventLogger.log("HTTP", message)
-                        Log.d("HTTP", message)
                     }
                 }
                 level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
@@ -93,5 +95,5 @@ val networkModule = module {
     }
 
     singleOf(::UserService)
-    singleOf(::ImageService)
+    singleOf(::ImageUploadService)
 }

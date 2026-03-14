@@ -11,30 +11,28 @@ import kotlinx.coroutines.launch
 fun Modifier.swipeCard(
     state: SwipeCardState,
     screenWidth: Float,
+    screenHeight: Float,
     onSwiped: (SwipeDirection) -> Unit = {}
 ): Modifier = composed {
     val scope = rememberCoroutineScope()
 
-    this.pointerInput(Unit) {
+    pointerInput(Unit) {
         detectDragGestures(
             onDrag = { change, dragAmount ->
                 change.consume()
-                scope.launch {
-                    state.drag(Offset(dragAmount.x, dragAmount.y))
-                }
+                scope.launch { state.drag(Offset(dragAmount.x, dragAmount.y)) }
             },
             onDragEnd = {
                 scope.launch {
-                    state.settle(screenWidth)
+                    state.settle(screenWidth, screenHeight)
                     if (state.swipedDirection != SwipeDirection.NONE) {
                         onSwiped(state.swipedDirection)
                     }
                 }
             },
             onDragCancel = {
-                scope.launch { state.settle(screenWidth) }
+                scope.launch { state.settle(screenWidth, screenHeight) }
             }
         )
     }
 }
-

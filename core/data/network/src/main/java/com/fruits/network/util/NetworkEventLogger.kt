@@ -1,4 +1,4 @@
-package com.fruits.network.user.logger
+package com.fruits.network.util
 
 interface NetworkEventLogger {
     fun log(tag: String, message: String)
