@@ -1,5 +1,6 @@
 package com.fruits.network.di
 
+import android.util.Log
 import com.fruits.network.user.service.UserService
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -13,10 +14,34 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
-import com.fruits.network.images.service.ImageUploadService
+import com.fruits.network.images.service.ImageService
 import com.fruits.network.user.logger.NetworkEventLogger
 import com.fruits.network.user.logger.NoOpNetworkLogger
-import java.util.logging.Logger
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
+
+class AllCertsTrustManager : X509TrustManager {
+
+    override fun checkClientTrusted(
+        chain: Array<out X509Certificate>?,
+        authType: String?
+    ) {
+    }
+
+    override fun checkServerTrusted(
+        chain: Array<out X509Certificate>?,
+        authType: String?
+    ) {
+    }
+
+    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+}
+
 
 val networkModule = module {
 
@@ -38,6 +63,7 @@ val networkModule = module {
                 logger = object : io.ktor.client.plugins.logging.Logger {
                     override fun log(message: String) {
                         eventLogger.log("HTTP", message)
+                        Log.d("HTTP", message)
                     }
                 }
                 level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
@@ -51,13 +77,21 @@ val networkModule = module {
             install(HttpTimeout) {
                 requestTimeoutMillis = 15_000
                 connectTimeoutMillis = 10_000
-                socketTimeoutMillis  = 15_000
+                socketTimeoutMillis = 15_000
             }
 
-            expectSuccess = false
+            engine {
+                sslManager = { httpsURLConnection ->
+                    httpsURLConnection.hostnameVerifier = HostnameVerifier { _, _ -> true }
+                    httpsURLConnection.sslSocketFactory = SSLContext.getInstance("TLS")
+                        .apply {
+                            init(null, arrayOf(AllCertsTrustManager()), SecureRandom())
+                        }.socketFactory
+                }
+            }
         }
     }
 
     singleOf(::UserService)
-    singleOf(::ImageUploadService)
+    singleOf(::ImageService)
 }
