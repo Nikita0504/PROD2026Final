@@ -13,10 +13,17 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
+import com.fruits.network.user.logger.NetworkEventLogger
+import com.fruits.network.user.logger.NoOpNetworkLogger
+import java.util.logging.Logger
 
 val networkModule = module {
 
+    single<NetworkEventLogger> { NoOpNetworkLogger }
+
     single {
+        val eventLogger: NetworkEventLogger = get()
+
         HttpClient(Android) {
             install(ContentNegotiation) {
                 json(Json {
@@ -27,6 +34,11 @@ val networkModule = module {
             }
 
             install(Logging) {
+                logger = object : io.ktor.client.plugins.logging.Logger {
+                    override fun log(message: String) {
+                        eventLogger.log("HTTP", message)
+                    }
+                }
                 level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
             }
 
@@ -47,4 +59,3 @@ val networkModule = module {
 
     singleOf(::UserService)
 }
-

@@ -27,12 +27,14 @@
             <option value="$PROJECT_DIR$/core/data/database" />
             <option value="$PROJECT_DIR$/core/data/network" />
             <option value="$PROJECT_DIR$/core/data/repository" />
+            <option value="$PROJECT_DIR$/core/debug" />
             <option value="$PROJECT_DIR$/core/domain" />
             <option value="$PROJECT_DIR$/core/navigation" />
             <option value="$PROJECT_DIR$/core/session" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/auth" />
             <option value="$PROJECT_DIR$/feature/chat" />
+            <option value="$PROJECT_DIR$/feature/debug_panel" />
             <option value="$PROJECT_DIR$/feature/profile" />
             <option value="$PROJECT_DIR$/feature/register" />
             <option value="$PROJECT_DIR$/feature/settings" />

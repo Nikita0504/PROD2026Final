@@ -4,6 +4,7 @@ import android.app.Application
 import com.fruits.chat.di.chatModule
 import com.fruits.auth.di.authModule
 import com.fruits.database.di.databaseModule
+import com.fruits.debug.di.debugModule
 import com.fruits.network.di.networkModule
 import com.fruits.profile.di.profileModule
 import com.fruits.prod2026final.di.appModule
@@ -30,6 +31,7 @@ class ProdApplication : Application() {
                 registerModule,
                 tapeModule,
                 profileModule,
+                if (BuildConfig.DEBUG) debugModule else emptyList()
             )
         }
     }

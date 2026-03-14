@@ -10,9 +10,13 @@ import com.fruits.repository.util.mapResult
 import com.fruits.repository.user_network.mapper.AuthMapper.toDomain
 import com.fruits.repository.user_network.mapper.TokensMapper.toDomain
 import com.fruits.repository.user_network.mapper.UserMapper.toDomain
+import com.fruits.debug.MockDataService
+import com.fruits.debug.MockStorage
 
 class UserNetworkRepositoryImpl(
-    private val service: UserService
+    private val service: UserService,
+    private val mockStorage: MockStorage,
+    private val mockDataService: MockDataService
 ) : UserNetworkRepository {
 
     override suspend fun register(
@@ -28,8 +32,10 @@ class UserNetworkRepositoryImpl(
         service.login(UserLoginSchema(email, password))
             .mapResult { it.toDomain() }
 
-    override suspend fun getProfile(accessToken: String): Result<User> =
-        service.getProfile(accessToken).mapResult { it.toDomain() }
+    override suspend fun getProfile(accessToken: String): Result<User> {
+        if (mockStorage.enabled) return Result.success(mockDataService.userMock)
+        return service.getProfile(accessToken).mapResult { it.toDomain() }
+    }
 
     override suspend fun refreshToken(refreshToken: String): Result<Tokens> =
         service.refreshToken(refreshToken).mapResult { it.toDomain() }

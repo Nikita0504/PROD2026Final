@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.fruits.domain.model.SessionState
 import com.fruits.navigation.TopLevelRoutes
 import com.fruits.prod2026final.navigation.AuthNavGraph
+import com.fruits.prod2026final.navigation.DebugNavGraph
 import com.fruits.prod2026final.navigation.MainNavGraph
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -21,5 +22,6 @@ fun AppRoot(
         SessionState.Loading -> SplashScreen()
         SessionState.Unauthorized -> AuthNavGraph()
         SessionState.Authorized -> MainNavGraph()
+        SessionState.Debug -> DebugNavGraph()
     }
 }

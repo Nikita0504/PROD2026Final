@@ -16,5 +16,7 @@ sealed interface Route {
     data object Chat : Route
     @Serializable
     data object Profile : Route
+    @Serializable
+    data object Debug : Route
 }
 

@@ -1,16 +1,19 @@
 plugins {
-    id("android.fruits.library")
+    id("android.fruits.feature")
     id("tech.fruits.koin")
     id("android.fruits.test")
 }
 
 android {
-    namespace = "com.fruits.repository"
+    namespace = "com.fruits.debug"
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
-dependencies{
+dependencies {
     implementation(projects.core.data.network)
-    implementation(projects.core.data.database)
     implementation(projects.core.domain)
     implementation(projects.core.debug)
 }
