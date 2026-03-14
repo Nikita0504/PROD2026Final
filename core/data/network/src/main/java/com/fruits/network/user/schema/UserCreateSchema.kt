@@ -9,5 +9,6 @@ data class UserCreateSchema(
     @SerialName("second_name") val secondName: String,
     val email: String,
     val password: String,
-    @SerialName("avatar_file_key") val avatarFileKey: String? = null
+    @SerialName("avatar_file_key") val avatarFileKey: String? = null,
+    @SerialName("ready_to_give") val readyToGive: Boolean = false
 )

@@ -11,7 +11,8 @@ object UserDbMapper {
             firstName = firstName,
             secondName = secondName,
             email = email,
-            avatarFileKey = avatarFileKey
+            avatarFileKey = avatarFileKey,
+            readyToGive = readyToGive
         )
 
     fun User.toEntity(): UserEntity =
@@ -20,6 +21,7 @@ object UserDbMapper {
             firstName = firstName,
             secondName = secondName,
             email = email,
-            avatarFileKey = avatarFileKey
+            avatarFileKey = avatarFileKey,
+            readyToGive = readyToGive
         )
 }

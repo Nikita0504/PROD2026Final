@@ -7,7 +7,7 @@ sealed interface Route {
     @Serializable
     data object Auth : Route
     @Serializable
-    data object Register : Route
+    data object Onboarding : Route
     @Serializable
     data object Settings : Route
     @Serializable
@@ -16,5 +16,7 @@ sealed interface Route {
     data object Chat : Route
     @Serializable
     data object Profile : Route
+    @Serializable
+    data object ChatList : Route
 }
 

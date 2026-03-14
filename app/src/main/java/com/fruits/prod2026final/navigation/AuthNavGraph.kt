@@ -6,7 +6,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.fruits.auth.authScreen
 import com.fruits.navigation.Route
-import com.fruits.register.registerScreen
 
 @Composable
 fun AuthNavGraph(
@@ -16,16 +15,6 @@ fun AuthNavGraph(
         navController = navController,
         startDestination = Route.Auth,
     ) {
-        authScreen(
-            onNavigateToRegister = {
-                navController.navigate(Route.Register)
-            },
-        )
-
-        registerScreen(
-            onNavigateBackToAuth = {
-                navController.popBackStack()
-            },
-        )
+        authScreen()
     }
 }

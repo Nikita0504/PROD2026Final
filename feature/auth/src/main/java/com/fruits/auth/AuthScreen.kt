@@ -21,7 +21,6 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AuthRoute(
-    onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -29,7 +28,6 @@ fun AuthRoute(
     AuthScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onNavigateToRegister = onNavigateToRegister,
     )
 }
 
@@ -37,7 +35,6 @@ fun AuthRoute(
 private fun AuthScreen(
     state: AuthState,
     onEvent: (AuthEvent) -> Unit,
-    onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold { p ->
@@ -97,16 +94,6 @@ private fun AuthScreen(
                     text = state.errorMessage,
                     modifier = Modifier.padding(top = 16.dp),
                 )
-            }
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp),
-                onClick = onNavigateToRegister,
-                enabled = !state.isLoading,
-            ) {
-                Text("Создать аккаунт")
             }
         }
     }

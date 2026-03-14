@@ -24,7 +24,7 @@ dependencies {
     implementation(projects.core.data.network)
     implementation(projects.core.data.database)
     implementation(projects.feature.auth)
-    implementation(projects.feature.register)
+    implementation(projects.feature.onboarding)
     implementation(projects.feature.profile)
     implementation(projects.feature.chat)
     implementation(projects.feature.tape)

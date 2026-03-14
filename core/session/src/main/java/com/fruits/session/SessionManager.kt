@@ -1,17 +1,18 @@
 package com.fruits.session
 
+import android.util.Log
 import com.fruits.domain.model.SessionState
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.usecase.auth.LoginUseCase
-import com.fruits.domain.usecase.auth.RegisterUserUseCase
+import com.fruits.domain.usecase.auth.UpdateProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class SessionManager(
     private val loginUseCase: LoginUseCase,
-    private val registerUseCase: RegisterUserUseCase,
+    private val updateProfileUseCase: UpdateProfileUseCase,
     private val tokenRepository: TokenRepository,
     private val userLocalRepository: UserLocalRepository
 ) {
@@ -24,7 +25,11 @@ class SessionManager(
         val hasToken = tokenRepository.getAccessToken().isNotEmpty()
 
         _sessionState.value = if (cachedUser != null && hasToken) {
-            SessionState.Authorized
+            if(cachedUser.readyToGive) {
+                SessionState.Authorized
+            } else {
+                SessionState.Onboarding
+            }
         } else {
             if (cachedUser != null || hasToken) clearSession()
             SessionState.Unauthorized
@@ -34,22 +39,41 @@ class SessionManager(
     suspend fun login(email: String, password: String): Result<Unit> {
         _sessionState.value = SessionState.Loading
         return loginUseCase(email, password)
-            .onSuccess { _sessionState.value = SessionState.Authorized }
-            .onFailure { _sessionState.value = SessionState.Unauthorized }
+            .onSuccess {
+                Log.d("SessionManager", "Login success")
+                if (it.readyToGive) {
+                    _sessionState.value = SessionState.Authorized
+                } else {
+                    _sessionState.value = SessionState.Onboarding
+                }
+            }
+            .onFailure {
+                Log.d("SessionManager", "Login failed $it")
+                _sessionState.value = SessionState.Unauthorized
+            }
             .map { Unit }
     }
 
-    suspend fun register(
-        firstName: String,
-        secondName: String,
-        email: String,
-        password: String
+    suspend fun onboard(
+        description: String,
+        imageIds: List<String>
     ): Result<Unit> {
         _sessionState.value = SessionState.Loading
-        return registerUseCase(firstName, secondName, email, password)
-            .onSuccess { _sessionState.value = SessionState.Authorized }
-            .onFailure { _sessionState.value = SessionState.Unauthorized }
-            .map { Unit }
+        return updateProfileUseCase(
+            description,
+            imageIds
+        )
+            .onSuccess {
+                if (it.readyToGive) {
+                    _sessionState.value = SessionState.Authorized
+                } else {
+                    _sessionState.value = SessionState.Onboarding
+                }
+            }
+            .onFailure {
+                _sessionState.value = SessionState.Onboarding
+            }
+            .map { }
     }
 
     suspend fun logout() {
