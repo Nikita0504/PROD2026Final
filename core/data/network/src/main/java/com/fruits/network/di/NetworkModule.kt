@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
+import com.fruits.network.images.service.ImageUploadService
 import com.fruits.network.user.logger.NetworkEventLogger
 import com.fruits.network.user.logger.NoOpNetworkLogger
 import java.util.logging.Logger
@@ -58,4 +59,5 @@ val networkModule = module {
     }
 
     singleOf(::UserService)
+    singleOf(::ImageUploadService)
 }
