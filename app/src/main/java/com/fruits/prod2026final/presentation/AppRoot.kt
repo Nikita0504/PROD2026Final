@@ -21,8 +21,8 @@ fun AppRoot(
 
     when (sessionState) {
         SessionState.Loading -> SplashScreen()
-        SessionState.Unauthorized -> AuthNavGraph()
-        SessionState.Onboarding -> OnboardingRoute()
+        is SessionState.Unauthorized -> AuthNavGraph()
+        is SessionState.Onboarding -> OnboardingRoute()
         SessionState.Authorized -> MainNavGraph()
         SessionState.Debug -> DebugNavGraph()
     }

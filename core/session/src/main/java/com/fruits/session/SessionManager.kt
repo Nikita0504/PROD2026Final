@@ -28,11 +28,11 @@ class SessionManager(
             if(cachedUser.readyToGive) {
                 SessionState.Authorized
             } else {
-                SessionState.Onboarding
+                SessionState.Onboarding()
             }
         } else {
             if (cachedUser != null || hasToken) clearSession()
-            SessionState.Unauthorized
+            SessionState.Unauthorized()
         }
     }
 
@@ -44,14 +44,14 @@ class SessionManager(
                 if (it.readyToGive) {
                     _sessionState.value = SessionState.Authorized
                 } else {
-                    _sessionState.value = SessionState.Onboarding
+                    _sessionState.value = SessionState.Onboarding()
                 }
             }
             .onFailure {
                 Log.d("SessionManager", "Login failed $it")
-                _sessionState.value = SessionState.Unauthorized
+                _sessionState.value = SessionState.Unauthorized(it.message)
             }
-            .map { Unit }
+            .map { }
     }
 
     suspend fun onboard(
@@ -67,20 +67,18 @@ class SessionManager(
                 if (it.readyToGive) {
                     _sessionState.value = SessionState.Authorized
                 } else {
-                    _sessionState.value = SessionState.Onboarding
+                    _sessionState.value = SessionState.Onboarding()
                 }
             }
             .onFailure {
-                _sessionState.value = SessionState.Onboarding
+                _sessionState.value = SessionState.Onboarding(it.message)
             }
             .map { }
     }
 
     suspend fun logout() {
-        println("logout-ses-start")
         clearSession()
-        _sessionState.value = SessionState.Unauthorized
-        println("logout-ses-end. ${_sessionState.value}")
+        _sessionState.value = SessionState.Unauthorized()
     }
 
     private suspend fun clearSession() {

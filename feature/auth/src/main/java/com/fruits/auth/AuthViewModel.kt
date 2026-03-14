@@ -7,12 +7,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.fruits.domain.model.SessionState
+
 
 class AuthViewModel(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AuthState())
+    private val _state = MutableStateFlow(AuthState(
+        errorMessage=(sessionManager.sessionState.value as SessionState.Unauthorized).error
+    ))
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
     fun onEvent(event: AuthEvent) {
