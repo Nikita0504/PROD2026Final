@@ -77,8 +77,10 @@ class SessionManager(
     }
 
     suspend fun logout() {
+        println("logout-ses-start")
         clearSession()
         _sessionState.value = SessionState.Unauthorized
+        println("logout-ses-end. ${_sessionState.value}")
     }
 
     private suspend fun clearSession() {

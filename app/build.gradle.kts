@@ -9,6 +9,9 @@ android {
     defaultConfig {
         applicationId = "com.fruits.prod2026final"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -29,4 +32,6 @@ dependencies {
     implementation(projects.feature.chat)
     implementation(projects.feature.tape)
     implementation(projects.core.domain)
+    implementation(projects.core.debug)
+    implementation(projects.feature.debugPanel)
 }

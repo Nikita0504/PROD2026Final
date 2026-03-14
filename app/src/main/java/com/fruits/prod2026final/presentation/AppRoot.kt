@@ -9,6 +9,7 @@ import com.fruits.domain.model.SessionState
 import com.fruits.navigation.TopLevelRoutes
 import com.fruits.onboarding.OnboardingRoute
 import com.fruits.prod2026final.navigation.AuthNavGraph
+import com.fruits.prod2026final.navigation.DebugNavGraph
 import com.fruits.prod2026final.navigation.MainNavGraph
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -23,5 +24,6 @@ fun AppRoot(
         SessionState.Unauthorized -> AuthNavGraph()
         SessionState.Onboarding -> OnboardingRoute()
         SessionState.Authorized -> MainNavGraph()
+        SessionState.Debug -> DebugNavGraph()
     }
 }

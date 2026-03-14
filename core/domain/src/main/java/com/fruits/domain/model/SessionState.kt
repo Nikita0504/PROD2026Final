@@ -5,4 +5,7 @@ sealed interface SessionState {
     data object Authorized : SessionState
     data object Onboarding : SessionState
     data object Unauthorized : SessionState
+
+    data object Debug : SessionState
+
 }
