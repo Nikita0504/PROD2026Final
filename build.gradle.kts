@@ -9,4 +9,5 @@ plugins {
     alias(libs.plugins.room) apply false
 
     id("org.jetbrains.kotlinx.kover") version "0.9.7"
+    id("com.google.gms.google-services") version "4.4.4" apply false
 }

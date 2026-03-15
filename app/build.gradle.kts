@@ -2,6 +2,9 @@ plugins {
     id("android.fruits.application")
     id("android.fruits.compose")
     id("android.fruits.test")
+
+    id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -38,4 +41,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.debug)
     implementation(projects.feature.debugPanel)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
