@@ -18,8 +18,8 @@ class UpdateProfileUseCase(
         val accessToken = tokensRepository.getAccessToken()
 
         val updateData = UserProfileUpdate(
-            description = description,
-            photoFilesKeys = photoFilesKeys
+            photoFilesKeys = photoFilesKeys,
+            description = description
         )
 
         val result = userNetworkRepository.patchProfile(updateData, accessToken)

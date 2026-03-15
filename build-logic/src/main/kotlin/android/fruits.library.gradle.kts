@@ -22,3 +22,10 @@ android {
 
 configureKotlinAndroid(extensions.getByType<LibraryExtension>())
 
+val path = project.path
+
+dependencies {
+    if (path != ":core:debug" && path != ":core:data:network" && path != ":core:domain" && path != ":core:navigation" ) {
+        "debugImplementation"(project(":core:debug"))
+    }
+}

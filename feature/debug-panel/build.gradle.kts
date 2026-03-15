@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.navigation)
     implementation(projects.core.debug)
     implementation(projects.core.domain)
 }

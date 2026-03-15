@@ -1,4 +1,4 @@
-package com.fruits.debugpanel.content
+package com.fruits.debugPanel.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

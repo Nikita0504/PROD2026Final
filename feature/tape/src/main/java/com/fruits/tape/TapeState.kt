@@ -11,5 +11,5 @@ data class TapeCardItem(
 data class TapeState(
     val currentCard: TapeCardItem? = null,
     val isLoading: Boolean = false,
+    val error: String? = null,
 )
-

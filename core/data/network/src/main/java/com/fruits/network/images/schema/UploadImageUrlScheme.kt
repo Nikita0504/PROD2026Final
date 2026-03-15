@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UploadImageUrlScheme(
     val url: String,
-    val key: String
+    val key: String,
+    val contentType: String = "application/octet-stream"
 )

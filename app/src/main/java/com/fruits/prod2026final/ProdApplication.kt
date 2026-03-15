@@ -5,6 +5,7 @@ import com.fruits.auth.di.authModule
 import com.fruits.chat.di.chatModule
 import com.fruits.database.di.databaseModule
 import com.fruits.debug.di.debugModule
+import com.fruits.debugPanel.di.debugPanelModule
 import com.fruits.network.di.networkModule
 import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
@@ -15,7 +16,6 @@ import com.fruits.session.sessionModule
 import com.fruits.tape.di.tapeModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-import kotlin.collections.emptyList
 
 class ProdApplication : Application() {
     override fun onCreate() {
@@ -34,8 +34,8 @@ class ProdApplication : Application() {
                 imageUploadUrlRepositorModule,
                 tapeModule,
                 profileModule,
-                debugModule
-                //if (BuildConfig.DEBUG)
+                debugModule,
+                debugPanelModule
             )
         }
     }

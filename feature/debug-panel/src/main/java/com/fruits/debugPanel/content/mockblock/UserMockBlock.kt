@@ -1,8 +1,6 @@
-package com.fruits.debugPanel.content
+package com.fruits.debugPanel.content.mockblock
 
-import com.fruits.debugpanel.UserMockEditState
-import com.fruits.debugpanel.content.MockEditBlock
-
+import com.fruits.debugPanel.UserMockEditState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -12,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.fruits.debugPanel.content.MockEditBlock
 
 
 @Composable
@@ -31,7 +30,6 @@ fun UserMockBlock(
             saved = true
         },
         saved = saved,
-        onStateChange = { saved = false } // сброс при редактировании
     ) {
         OutlinedTextField(
             value = state.firstName,

@@ -20,8 +20,10 @@ fun SwipeCard(
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenWidthPx  = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
 
+    // При горизонтальном свайпе — вращение; при вертикальном X = 0, rotation = 0 автоматически
     val rotation = (state.offset.value.x / screenWidthPx) * 30f
     val alpha = 1f - (abs(state.offset.value.x) / screenWidthPx).coerceIn(0f, 1f) * 0.6f
 
@@ -36,6 +38,7 @@ fun SwipeCard(
             .swipeCard(
                 state = state,
                 screenWidth = screenWidthPx,
+                screenHeight = screenHeightPx,
                 onSwiped = onSwiped
             ),
         elevation = CardDefaults.cardElevation(8.dp),

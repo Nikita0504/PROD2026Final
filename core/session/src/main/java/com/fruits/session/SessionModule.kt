@@ -5,21 +5,15 @@ import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
 import com.fruits.domain.usecase.auth.GetProfileUseCase
 import com.fruits.domain.usecase.auth.LoginUseCase
-import com.fruits.domain.usecase.auth.RegisterUserUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
+import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
 import com.fruits.domain.usecase.image.BatchDownloadImagesUseCase
 import com.fruits.domain.usecase.image.UploadImageUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val sessionModule = module {
-    single {
-        LoginUseCase(
-            get<UserNetworkRepository>(),
-            get<UserLocalRepository>(),
-            get<TokenRepository>()
-        )
-    }
+    singleOf(::LoginUseCase)
 
     single {
         GetProfileUseCase(
@@ -44,14 +38,6 @@ val sessionModule = module {
         )
     }
 
-    single {
-        RegisterUserUseCase(
-            get<UserNetworkRepository>(),
-            get<UserLocalRepository>(),
-            get<TokenRepository>()
-        )
-    }
-
 
     single {
         BatchDownloadImagesUseCase(
@@ -60,4 +46,6 @@ val sessionModule = module {
     }
 
     singleOf(::SessionManager)
+
+    singleOf(::GetRecommendationsUseCase)
 }

@@ -1,6 +1,6 @@
-package com.fruits.debug
+package com.fruits.debugPanel.content
 
-import com.fruits.debugpanel.DebugPanelViewModel
+import com.fruits.debugPanel.DebugPanelViewModel
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,11 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.fruits.debugPanel.content.UserMockBlock
+import com.fruits.debugPanel.content.mockblock.TokensMockBlock
+import com.fruits.debugPanel.content.mockblock.UserMockBlock
 
 @Composable
 fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
-    val userMockState by vm.userMockState.collectAsStateWithLifecycle()
+    val userState by vm.userState.collectAsStateWithLifecycle()
+    val tokensState by vm.tokensState.collectAsStateWithLifecycle()
+    val recommendationsState by vm.recommendationsState.collectAsStateWithLifecycle()
+
 
     Column(
         Modifier
@@ -33,7 +37,6 @@ fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Главный тоггл
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -45,15 +48,26 @@ fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
 
         HorizontalDivider()
 
-        // Блок для каждой модели — изолирован
         UserMockBlock(
-            state = userMockState,
+            state = userState,
             enabled = mockEnabled,
-            onStateChange = vm::updateUserMockState,
+            onStateChange = vm::updateUserState,
             onSave = vm::saveUserMock
         )
 
-        // Сюда добавляешь следующие блоки по аналогии
-        // ProductsMockBlock(...)
+        TokensMockBlock(
+            state = tokensState,
+            enabled = mockEnabled,
+            onStateChange = vm::updateTokensState,
+            onSave = vm::saveTokensMock
+        )
+
+
+        RecommendationsMockBlock(
+            states = recommendationsState,
+            enabled = mockEnabled,
+            onStateChange = vm::updateRecommendationState,
+            onSave = vm::saveRecommendationsMock
+        )
     }
 }
