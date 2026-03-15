@@ -1,12 +1,13 @@
 package com.fruits.tape
 
+import com.fruits.logger.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.model.interactions.UserAction
+import com.fruits.domain.repository.ImageUploadUrlRepository
 import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
-import com.fruits.logger.Log
 import com.fruits.tape.components.swipe_card.SwipeDirection
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class TapeViewModel(
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val sendUserActionUseCase: SendUserActionUseCase,
+    private val imageUploadUrlRepository: ImageUploadUrlRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TapeState())
@@ -61,10 +63,18 @@ class TapeViewModel(
 
         if (action != null) {
             viewModelScope.launch {
-                sendUserActionUseCase(
+                Log.d(TAG, "Sending user action: userId=${current.userId}, action=$action, url:${current.imageUrl} ")
+                val result = sendUserActionUseCase(
                     targetUserId = current.userId,
                     action = action,
                 )
+                result
+                    .onSuccess {
+                        Log.i(TAG, "User action sent successfully: userId=${current.userId}, action=$action")
+                    }
+                    .onFailure { error ->
+                        Log.w(TAG, "Failed to send user action: userId=${current.userId}, action=$action, error=${error.message}")
+                    }
             }
         }
 
@@ -90,7 +100,14 @@ class TapeViewModel(
                         Log.d(TAG, "[$i] imageUrl=${r.photoFileKeys.firstOrNull()}")
                         Log.d(TAG, "[$i] explanation(${r.explanation.size})=${r.explanation}")
                     }
-                    buffer.addAll(list.map { it.toCardItem() })
+                    val photoKeys = list.mapNotNull { it.photoFileKeys.firstOrNull() }.distinct()
+                    val urlMap = if (photoKeys.isEmpty()) emptyMap()
+                    else imageUploadUrlRepository.getDownloadUrls(photoKeys)
+                        .getOrNull()
+                        ?.associate { it.key to it.url }
+                        ?: emptyMap()
+                    Log.d(TAG, "Resolved ${urlMap.size} image URLs for ${photoKeys.size} keys")
+                    buffer.addAll(list.map { it.toCardItem(urlMap) })
                     val first = buffer.removeFirstOrNull()
                     Log.d(TAG, "First card: userId=${first?.userId}, imageUrl=${first?.imageUrl}, reasons=${first?.reasonInFeed}")
                     _state.update {
@@ -115,12 +132,12 @@ class TapeViewModel(
     }
 }
 
-private fun Recommendations.toCardItem() = TapeCardItem(
+private fun Recommendations.toCardItem(urlMap: Map<String, String>) = TapeCardItem(
     userId = userId,
     name = "$firstName $secondName",
     age = age,
     city = city,
-    imageUrl = photoFileKeys.firstOrNull() ?: "",
+    imageUrl = photoFileKeys.firstOrNull()?.let { urlMap[it] } ?: "",
     reasonInFeed = explanation,
     about = description
 )

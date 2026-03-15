@@ -27,12 +27,23 @@ class ChatService(
         safeCall {
             Log.d(TAG, "Requesting chats list, token present: ${accessToken.isNotBlank()}")
 
-            client.get(baseUrl) {
+            val result: ApiResult<List<ChatListItemSchema>> = client.get(baseUrl) {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }.toApiResult(
+            }.toApiResult<List<ChatListItemSchema>>(
                 401 to "Пользователь не авторизован",
                 503 to "Сервис временно недоступен, попробуйте позже",
             )
+
+            when (result) {
+                is ApiResult.Success -> {
+                    Log.i(TAG, "Chats fetched: count=${result.data.size}")
+                }
+                is ApiResult.Error -> {
+                    Log.w(TAG, "Failed to fetch chats: code=${result.code}, message=${result.message}")
+                }
+            }
+
+            result
         }
 
     suspend fun getChat(
@@ -40,15 +51,26 @@ class ChatService(
         chatId: String,
     ): ApiResult<ChatDetailSchema> =
         safeCall {
-            Log.d(TAG, "Requesting chat details, chatId=$chatId")
+            Log.d(TAG, "Requesting chat details, chatId=$chatId, token present: ${accessToken.isNotBlank()}")
 
-            client.get("$baseUrl/$chatId") {
+            val result: ApiResult<ChatDetailSchema> = client.get("$baseUrl/$chatId") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }.toApiResult(
+            }.toApiResult<ChatDetailSchema>(
                 401 to "Пользователь не авторизован",
                 422 to "Ошибка валидации данных",
                 503 to "Сервис временно недоступен, попробуйте позже",
             )
+
+            when (result) {
+                is ApiResult.Success -> {
+                    Log.i(TAG, "Chat details fetched: chatId=${result.data.chatId}, messages=${result.data.messages.size}")
+                }
+                is ApiResult.Error -> {
+                    Log.w(TAG, "Failed to fetch chat details: chatId=$chatId, code=${result.code}, message=${result.message}")
+                }
+            }
+
+            result
         }
 
     suspend fun deleteChat(
@@ -56,16 +78,26 @@ class ChatService(
         chatId: String,
     ): ApiResult<Unit> =
         safeCall {
-            Log.d(TAG, "Deleting chat, chatId=$chatId")
+            Log.d(TAG, "Deleting chat, chatId=$chatId, token present: ${accessToken.isNotBlank()}")
 
-            client.delete("$baseUrl/$chatId") {
+            val result: ApiResult<Unit> = client.delete("$baseUrl/$chatId") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }.toApiResult(
-                204 to Unit,
+            }.toApiResult<Unit>(
                 401 to "Пользователь не авторизован",
                 422 to "Ошибка валидации данных",
                 503 to "Сервис временно недоступен, попробуйте позже",
             )
+
+            when (result) {
+                is ApiResult.Success -> {
+                    Log.i(TAG, "Chat deleted successfully: chatId=$chatId")
+                }
+                is ApiResult.Error -> {
+                    Log.w(TAG, "Failed to delete chat: chatId=$chatId, code=${result.code}, message=${result.message}")
+                }
+            }
+
+            result
         }
 
     suspend fun sendMessage(
@@ -74,17 +106,27 @@ class ChatService(
         text: String,
     ): ApiResult<SendMessageResponseSchema> =
         safeCall {
-            Log.d(TAG, "Sending message to chat=$chatId")
+            Log.d(TAG, "Sending message to chat=$chatId, textLength=${text.length}")
 
-            client.post("$baseUrl/$chatId/messages") {
+            val result: ApiResult<SendMessageResponseSchema> = client.post("$baseUrl/$chatId/messages") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
                 setBody(SendMessageRequestSchema(text = text))
-            }.toApiResult(
-                201 to "Сообщение успешно отправлено",
+            }.toApiResult<SendMessageResponseSchema>(
                 401 to "Пользователь не авторизован",
                 422 to "Ошибка валидации данных",
                 503 to "Сервис временно недоступен, попробуйте позже",
             )
+
+            when (result) {
+                is ApiResult.Success -> {
+                    Log.i(TAG, "Message sent: chatId=$chatId, messageId=${result.data.messageId}")
+                }
+                is ApiResult.Error -> {
+                    Log.w(TAG, "Failed to send message: chatId=$chatId, code=${result.code}, message=${result.message}")
+                }
+            }
+
+            result
         }
 
     companion object {

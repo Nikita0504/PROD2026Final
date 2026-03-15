@@ -1,11 +1,19 @@
 package com.fruits.logger
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+private const val MAX_LOG_LENGTH = 3000
 
 class DebugNetworkLogger : NetworkEventLogger {
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+
     override fun log(tag: String, message: String) {
-        DebugLogStorage.log(tag, message)
+        if (message.length <= MAX_LOG_LENGTH) {
+            Log.d(tag, message)
+            return
+        }
+        var offset = 0
+        while (offset < message.length) {
+            val end = minOf(offset + MAX_LOG_LENGTH, message.length)
+            Log.d(tag, message.substring(offset, end))
+            offset = end
+        }
     }
 }

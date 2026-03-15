@@ -11,10 +11,16 @@ import kotlinx.coroutines.launch
 
 class RootViewModel(
     private val sessionManager: SessionManager,
-    private val shakeDetector: ShakeDetector
+    private val shakeDetector: ShakeDetector,
+    private val debugPanelVisibility: DebugPanelVisibility
 ) : ViewModel() {
 
     val sessionState: StateFlow<SessionState> = sessionManager.sessionState
+    val debugPanelVisible: StateFlow<Boolean> = debugPanelVisibility.visible
+
+    fun closeDebugPanel() {
+        debugPanelVisibility.toggle()
+    }
 
     init {
         viewModelScope.launch { sessionManager.restoreSession() }

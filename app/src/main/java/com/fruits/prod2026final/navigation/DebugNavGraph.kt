@@ -9,13 +9,13 @@ import com.fruits.navigation.Route
 
 @Composable
 fun DebugNavGraph(
+    onClose: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
         navController = navController,
         startDestination = Route.Debug,
-    )
-    {
-        debugPanelScreen()
+    ) {
+        debugPanelScreen(onClose = onClose)
     }
 }
