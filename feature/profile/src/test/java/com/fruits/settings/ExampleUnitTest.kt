@@ -1,4 +1,4 @@
-package com.fruits.profile
+package com.fruits.settings
 
 import org.junit.Test
 

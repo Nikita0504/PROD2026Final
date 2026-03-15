@@ -38,4 +38,5 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.debug)
     implementation(projects.feature.debugPanel)
+    implementation(projects.feature.settings)
 }

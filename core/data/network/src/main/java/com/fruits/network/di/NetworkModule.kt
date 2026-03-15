@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
+import com.fruits.network.chat.service.ChatService
 import com.fruits.network.images.service.ImageService
 import com.fruits.network.interactions.service.InteractionsService
 import com.fruits.network.recommendations.service.RecommendationsService
@@ -91,5 +92,6 @@ val networkModule = module {
     singleOf(::ImageService)
     singleOf(::RecommendationsService)
     singleOf(::InteractionsService)
+    singleOf(::ChatService)
 }
 

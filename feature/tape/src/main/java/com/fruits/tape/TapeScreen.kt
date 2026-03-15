@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -105,17 +106,13 @@ private fun TapeScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Box(
-                modifier = Modifier
-                    .size(cardWidth, cardHeight)
-                    .clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier.size(cardWidth, cardHeight),
                 contentAlignment = Alignment.Center,
             ) {
                 when {
                     state.isLoading -> {
                         Box(
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator()
@@ -123,48 +120,30 @@ private fun TapeScreen(
                     }
                     state.error != null -> {
                         Column(
-                            Modifier
+                            modifier = Modifier
                                 .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.errorContainer)
                                 .padding(24.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Text(
-                                text = "Не удалось загрузить",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                            )
+                            TapeErrorTitle()
                             Spacer(Modifier.height(12.dp))
-                            Button(onClick = { onEvent(TapeEvent.OnRetry) }) {
-                                Text("Повторить")
-                            }
+                            TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
                         }
                     }
                     state.isEmpty -> {
                         Column(
-                            Modifier
+                            modifier = Modifier
                                 .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .padding(24.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Text(
-                                text = "Лента пуста",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            TapeEmptyTitle()
                             Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = "Новые рекомендации появятся позже",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            TapeEmptySubtitle()
                             Spacer(Modifier.height(16.dp))
-                            Button(onClick = { onEvent(TapeEvent.OnRetry) }) {
-                                Text("Обновить")
-                            }
+                            TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
                         }
                     }
                     state.currentCard != null -> {
@@ -178,33 +157,29 @@ private fun TapeScreen(
                                 }
                             },
                         ) {
-                            TapeCardContent(
-                                name = state.currentCard.name,
-                                age = state.currentCard.age,
-                                city = state.currentCard.city,
-                                imageUrl = state.currentCard.imageUrl,
-                            )
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                TapeCardContent(
+                                    name = state.currentCard.name,
+                                    age = state.currentCard.age,
+                                    city = state.currentCard.city,
+                                    imageUrl = state.currentCard.imageUrl,
+                                )
+                                TapeCardOverlay(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth(),
+                                    name = state.currentCard.name,
+                                    age = state.currentCard.age,
+                                    city = state.currentCard.city,
+                                    isActionsEnabled = !state.isLoading,
+                                    onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
+                                    onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
+                                )
+                            }
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            TapeActionBar(
-                onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
-                onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
-                enabled = state.currentCard != null && !state.isLoading,
-            )
-
-//            if (state.currentCard != null && !state.isLoading) {
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Text(
-//                    text = "Влево — нет · Вправо — да · Вверх — пропустить",
-//                    style = MaterialTheme.typography.bodySmall,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                )
-//            }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -289,5 +264,103 @@ private fun TapeScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TapeCardOverlay(
+    modifier: Modifier,
+    name: String,
+    age: Int,
+    city: String,
+    isActionsEnabled: Boolean,
+    onWhyClick: () -> Unit,
+    onAboutClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.85f),
+                    ),
+                ),
+            )
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedButton(
+                    onClick = onAboutClick,
+                    enabled = isActionsEnabled,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(999.dp),
+                ) {
+                    Text(text = "О себе")
+                }
+                OutlinedButton(
+                    onClick = onWhyClick,
+                    enabled = isActionsEnabled,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(999.dp),
+                ) {
+                    Text(text = "Почему")
+                }
+            }
+            Text(
+                text = "$name, $age",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+            )
+            Text(
+                text = city,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.85f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TapeErrorTitle() {
+    Text(
+        text = "Не удалось загрузить",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onErrorContainer,
+    )
+}
+
+@Composable
+private fun TapeEmptyTitle() {
+    Text(
+        text = "Лента пуста",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun TapeEmptySubtitle() {
+    Text(
+        text = "Новые рекомендации появятся позже",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun TapeRetryButton(
+    onRetryClick: () -> Unit,
+) {
+    OutlinedButton(onClick = onRetryClick, shape = RoundedCornerShape(999.dp)) {
+        Text("Обновить")
     }
 }

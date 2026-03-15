@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fruits.chat.chatScreen
@@ -35,6 +36,7 @@ import com.fruits.chatlist.chatListScreen
 import com.fruits.navigation.Route
 import com.fruits.navigation.TopLevelRoutes
 import com.fruits.profile.profileScreen
+import com.fruits.settings.ProfileSettingsRoute
 import com.fruits.tape.tapeScreen
 import kotlinx.coroutines.launch
 
@@ -142,8 +144,21 @@ fun MainNavGraph() {
                         scope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
+                    },
+                    onNavigateToProfileSettings = {
+                        navController.navigate(Route.ProfileSettings)
                     }
                 )
+                composable<Route.ProfileSettings> {
+                    ProfileSettingsRoute(
+                        onShowSnackbar = { message ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        },
+                        onNavigateBack = { navController.popBackStack() },
+                    )
+                }
             }
         }
     }

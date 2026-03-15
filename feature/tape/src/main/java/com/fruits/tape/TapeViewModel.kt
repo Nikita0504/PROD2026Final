@@ -3,8 +3,11 @@ package com.fruits.tape
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.domain.model.recommendations.Recommendations
+import com.fruits.domain.model.interactions.UserAction
+import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
 import com.fruits.logger.Log
+import com.fruits.tape.components.swipe_card.SwipeDirection
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,7 +18,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TapeViewModel(
-    private val getRecommendationsUseCase: GetRecommendationsUseCase
+    private val getRecommendationsUseCase: GetRecommendationsUseCase,
+    private val sendUserActionUseCase: SendUserActionUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TapeState())
@@ -38,9 +42,33 @@ class TapeViewModel(
             TapeEvent.OnAboutClicked -> _state.value.currentCard?.let {
                 viewModelScope.launch { _effects.emit(TapeEffect.ShowAboutSheet(it.about)) }
             }
-            is TapeEvent.OnCardSwiped -> nextCard()
+            is TapeEvent.OnCardSwiped -> handleSwipe(event.direction)
             TapeEvent.OnRetry -> loadRecommendations()
         }
+    }
+
+    private fun handleSwipe(direction: SwipeDirection) {
+        val current = _state.value.currentCard ?: run {
+            nextCard()
+            return
+        }
+
+        val action = when (direction) {
+            SwipeDirection.LEFT -> UserAction.DISLIKE
+            SwipeDirection.RIGHT -> UserAction.LIKE
+            else -> null
+        }
+
+        if (action != null) {
+            viewModelScope.launch {
+                sendUserActionUseCase(
+                    targetUserId = current.userId,
+                    action = action,
+                )
+            }
+        }
+
+        nextCard()
     }
 
     private fun nextCard() {
