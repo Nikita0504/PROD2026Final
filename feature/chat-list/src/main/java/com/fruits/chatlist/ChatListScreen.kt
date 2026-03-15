@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,7 +81,7 @@ fun ChatListRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatListScreen(
+fun ChatListScreen(
     state: ChatListState,
     onEvent: (ChatListEvent) -> Unit
 ) {
@@ -118,11 +119,16 @@ private fun ChatListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = colorScheme.primary)
+                    CircularProgressIndicator(
+                        color = colorScheme.primary,
+                        modifier = Modifier.testTag("chat_list_progress")
+                    )
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("chat_list"),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)
                 ) {
@@ -159,7 +165,8 @@ private fun ChatListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("chat_item_${chat.id}"),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
         shape = MaterialTheme.shapes.medium
     ) {

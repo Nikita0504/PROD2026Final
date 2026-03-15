@@ -100,7 +100,7 @@ private fun ChatScreen(
                     }
                     state.error != null && state.messages.isEmpty() -> {
                         Text(
-                            text = state.error ?: "Ошибка загрузки",
+                            text = state.error,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error,
                         )

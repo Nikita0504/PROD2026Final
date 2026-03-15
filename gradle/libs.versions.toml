@@ -82,6 +82,7 @@ uiTestJunit4 = "1.10.4"
 espressoCore = "3.7.0"
 mockk = "1.14.9"
 turbine = "1.2.1"
+truth = "1.1.5"
 
 # Misc
 kotlinxDatetime = "0.7.1"
@@ -192,6 +193,7 @@ security-crypto = { module = "androidx.security:security-crypto", version.ref = 
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tinkAndroid" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 # ─────────────────────────────────────
 # Gradle Plugins as libraries (для build-logic/build.gradle.kts)
@@ -244,11 +246,15 @@ unit-test = [
     "coroutines-test",
     "turbine",
     "kotlin-test",
+    "compose-ui-test-manifest",
+    "truth",
 ]
 android-test = [
     "junit-ext",
     "espresso-core",
     "compose-ui-test-junit4",
+    "compose-ui-test-manifest",
+    "truth",
 ]
 
 

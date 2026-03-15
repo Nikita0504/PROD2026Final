@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,7 +33,7 @@ fun AuthRoute(
 }
 
 @Composable
-private fun AuthScreen(
+fun AuthScreen(
     state: AuthState,
     onEvent: (AuthEvent) -> Unit,
     modifier: Modifier = Modifier,
@@ -46,12 +47,16 @@ private fun AuthScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = "Вход")
+            Text(
+                text = "Вход",
+                modifier = Modifier.testTag("auth_title"),
+            )
 
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp),
+                    .padding(top = 24.dp)
+                    .testTag("email_field"),
                 value = state.email,
                 onValueChange = { onEvent(AuthEvent.EmailChanged(it)) },
                 label = { Text("Email") },
@@ -62,7 +67,8 @@ private fun AuthScreen(
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
+                    .padding(top = 12.dp)
+                    .testTag("password_field"),
                 value = state.password,
                 onValueChange = { onEvent(AuthEvent.PasswordChanged(it)) },
                 label = { Text("Пароль") },
@@ -74,14 +80,16 @@ private fun AuthScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp),
+                    .padding(top = 24.dp)
+                    .testTag("login_button"),
                 onClick = { onEvent(AuthEvent.LoginClicked) },
                 enabled = state.canSubmit && !state.isLoading,
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier
-                            .padding(4.dp),
+                            .padding(4.dp)
+                            .testTag("login_progress"),
                         strokeWidth = 2.dp,
                     )
                 } else {
@@ -92,7 +100,9 @@ private fun AuthScreen(
             if (state.errorMessage != null) {
                 Text(
                     text = state.errorMessage,
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .testTag("error_message"),
                 )
             }
         }
