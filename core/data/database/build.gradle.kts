@@ -11,5 +11,4 @@ android {
 
 dependencies {
     implementation(libs.security.crypto)
-    implementation(projects.core.debug)
 }

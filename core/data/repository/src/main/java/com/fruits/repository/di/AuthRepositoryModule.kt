@@ -1,10 +1,12 @@
 package com.fruits.repository.di
 
 import com.fruits.database.token.TokenStorage
+import com.fruits.domain.repository.InteractionsRepository
 import com.fruits.domain.repository.RecommendationsRepository
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
+import com.fruits.repository.interactions.InteractionsRepositoryImpl
 import com.fruits.repository.recommendations.RecommendationsRepositoryImpl
 import com.fruits.repository.token.TokenRepositoryImpl
 import com.fruits.repository.user_local.UserLocalRepositoryImpl
@@ -21,4 +23,5 @@ val authRepositoryModule = module {
     singleOf(::UserNetworkRepositoryImpl).bind<UserNetworkRepository>()
     singleOf(::UserLocalRepositoryImpl).bind<UserLocalRepository>()
     singleOf(::RecommendationsRepositoryImpl).bind<RecommendationsRepository>()
+    singleOf(::InteractionsRepositoryImpl).bind<InteractionsRepository>()
 }

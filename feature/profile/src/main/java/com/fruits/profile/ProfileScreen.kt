@@ -545,7 +545,6 @@ private fun ImageItem(
     }
 }
 
-@Preview
 @Composable
 private fun ProfileScreenPreview() {
     ProfileScreen(

@@ -14,6 +14,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
 import com.fruits.network.images.service.ImageService
+import com.fruits.network.interactions.service.InteractionsService
 import com.fruits.network.recommendations.service.RecommendationsService
 import com.fruits.network.util.AndroidNetworkLogger
 import com.fruits.network.util.NetworkEventLogger
@@ -90,5 +91,6 @@ val networkModule = module {
     singleOf(::UserService)
     singleOf(::ImageService)
     singleOf(::RecommendationsService)
+    singleOf(::InteractionsService)
 }
 
