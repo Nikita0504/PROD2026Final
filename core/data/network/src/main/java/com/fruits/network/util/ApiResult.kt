@@ -1,6 +1,6 @@
 package com.fruits.network.util
 
-import android.util.Log
+import com.fruits.logger.Log
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 

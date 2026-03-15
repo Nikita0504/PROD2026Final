@@ -6,13 +6,8 @@ plugins {
 
 android {
     namespace = "com.fruits.debug"
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {
-    implementation(projects.core.data.network)
     implementation(projects.core.domain)
 }

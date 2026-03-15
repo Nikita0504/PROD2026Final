@@ -22,6 +22,8 @@ dependencies {
     compileOnly(libs.plugins.kotlin.serialization.toDep())
     compileOnly(libs.plugins.ksp.toDep())
     compileOnly(libs.plugins.room.toDep())
+
+    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.9.7")
 }
 fun Provider<PluginDependency>.toDep() =
     map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" }

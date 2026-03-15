@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import androidx.core.content.edit
-import com.fruits.debug.Log
+import com.fruits.logger.Log
 
 @Suppress("DEPRECATION")
 class TokenStorage(context: Context) {

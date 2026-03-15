@@ -1,19 +1,13 @@
 plugins {
     id("android.fruits.library")
-    id("tech.fruits.ktor")
     id("tech.fruits.koin")
     id("android.fruits.test")
 }
 
 android {
-    namespace = "com.fruits.network"
+    namespace = "com.fruits.logger"
 
     buildFeatures {
         buildConfig = true
     }
-}
-
-dependencies{
-    implementation(projects.core.domain)
-    implementation(projects.core.debug)
 }

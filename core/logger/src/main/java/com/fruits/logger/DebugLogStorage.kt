@@ -1,4 +1,4 @@
-package com.fruits.debug
+package com.fruits.logger
 
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow

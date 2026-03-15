@@ -1,6 +1,6 @@
 package com.fruits.network.user.service
 
-import android.util.Log
+import com.fruits.logger.Log
 import com.fruits.network.Const.serverUrl
 import com.fruits.network.user.schema.RefreshTokenSchema
 import com.fruits.network.user.schema.TokenReadSchema

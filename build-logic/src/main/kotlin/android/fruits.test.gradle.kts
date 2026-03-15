@@ -12,3 +12,7 @@ dependencies {
     "androidTestImplementation"(libs.findBundle("android-test").get())
 }
 
+
+plugins {
+    id("org.jetbrains.kotlinx.kover")
+}

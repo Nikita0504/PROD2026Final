@@ -1,6 +1,6 @@
 package com.fruits.domain.usecase.image
 
-import android.util.Log
+import com.fruits.logger.Log
 import com.fruits.domain.model.image.BatchDownloadResult
 import com.fruits.domain.model.image.SingleDownloadResult
 import com.fruits.domain.repository.ImageUploadUrlRepository

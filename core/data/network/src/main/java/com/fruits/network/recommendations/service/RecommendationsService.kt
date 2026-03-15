@@ -1,6 +1,6 @@
 package com.fruits.network.recommendations.service
 
-import android.util.Log
+import com.fruits.logger.Log
 import com.fruits.network.recommendations.schema.RecommendationsResponse
 import com.fruits.network.util.ApiResult
 import com.fruits.network.util.safeCall

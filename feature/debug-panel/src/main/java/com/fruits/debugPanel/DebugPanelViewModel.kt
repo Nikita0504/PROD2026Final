@@ -2,12 +2,12 @@ package com.fruits.debugPanel
 
 
 import androidx.lifecycle.ViewModel
-import com.fruits.debug.DebugLogStorage
 import com.fruits.debug.MockDataService
 import com.fruits.debug.MockStorage
 import com.fruits.debugPanel.extension.toEditState
 import com.fruits.domain.model.user.Tokens
 import com.fruits.domain.model.user.User
+import com.fruits.logger.DebugLogStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

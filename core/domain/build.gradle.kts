@@ -7,3 +7,7 @@ plugins {
 android {
     namespace = "com.fruits.domain"
 }
+
+dependencies {
+    implementation(projects.core.logger)
+}

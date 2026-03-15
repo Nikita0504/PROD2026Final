@@ -25,6 +25,7 @@ dependencies {
 
     implementation(projects.core.navigation)
     implementation(projects.core.session)
+    implementation(projects.core.logger)
     implementation(projects.core.data.repository)
     implementation(projects.core.data.network)
     implementation(projects.core.data.database)

@@ -1,6 +1,4 @@
-package com.fruits.network.util
-
-import android.util.Log
+package com.fruits.logger
 
 interface NetworkEventLogger {
     fun log(tag: String, message: String)

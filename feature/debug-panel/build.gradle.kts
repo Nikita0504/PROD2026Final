@@ -10,4 +10,5 @@ android {
 dependencies {
     implementation(projects.core.debug)
     implementation(projects.core.domain)
+    implementation(projects.core.navigation)
 }

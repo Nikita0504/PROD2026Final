@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.fruits.debug.DebugLogStorage
+import com.fruits.logger.DebugLogStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

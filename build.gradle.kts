@@ -7,4 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.room) apply false
+
+    id("org.jetbrains.kotlinx.kover") version "0.9.7"
 }

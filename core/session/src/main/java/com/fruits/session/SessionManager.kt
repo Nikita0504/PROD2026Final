@@ -1,12 +1,12 @@
 package com.fruits.session
 
-import com.fruits.debug.Log
 import com.fruits.domain.model.SessionState
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
 import com.fruits.domain.usecase.auth.LoginUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
+import com.fruits.logger.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

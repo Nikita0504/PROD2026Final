@@ -191,6 +191,7 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tinkAndroid" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 # ─────────────────────────────────────
 # Gradle Plugins as libraries (для build-logic/build.gradle.kts)
@@ -242,6 +243,7 @@ unit-test = [
     "mockk",
     "coroutines-test",
     "turbine",
+    "kotlin-test",
 ]
 android-test = [
     "junit-ext",

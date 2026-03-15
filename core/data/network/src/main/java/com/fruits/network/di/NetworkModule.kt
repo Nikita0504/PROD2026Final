@@ -1,5 +1,7 @@
 package com.fruits.network.di
 
+import com.fruits.logger.AndroidNetworkLogger
+import com.fruits.logger.NetworkEventLogger
 import com.fruits.network.user.service.UserService
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -15,9 +17,6 @@ import org.koin.dsl.module
 import com.fruits.network.BuildConfig
 import com.fruits.network.images.service.ImageService
 import com.fruits.network.recommendations.service.RecommendationsService
-import com.fruits.network.util.AndroidNetworkLogger
-import com.fruits.network.util.NetworkEventLogger
-import com.fruits.network.util.NoOpNetworkLogger
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.HostnameVerifier

@@ -17,9 +17,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fruits.debug.Log
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
+import com.fruits.logger.Log
 
 @Composable
 fun TapeCardContent(

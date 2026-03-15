@@ -1,6 +1,5 @@
 package com.fruits.domain.usecase.auth
 
-import android.util.Log
 import com.fruits.domain.model.user.User
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
@@ -16,7 +15,6 @@ class LoginUseCase(
             .getOrElse { return Result.failure(it) }
 
         tokenRepository.saveTokens(tokens.accessToken, tokens.refreshToken)
-        Log.d("LoginUseCase", "Tokens saved")
 
         return userNetworkRepository.getProfile(tokens.accessToken)
             .onSuccess { user -> userLocalRepository.upsertUser(user) }

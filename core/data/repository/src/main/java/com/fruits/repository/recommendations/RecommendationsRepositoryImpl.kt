@@ -1,10 +1,10 @@
 package com.fruits.repository.recommendations
 
-import com.fruits.debug.Log
 import com.fruits.debug.MockDataService
 import com.fruits.debug.MockStorage
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.repository.RecommendationsRepository
+import com.fruits.logger.Log
 import com.fruits.network.recommendations.service.RecommendationsService
 import com.fruits.network.util.ApiResult
 import com.fruits.repository.recommendations.mapper.RecommendationsMapper.toDomain

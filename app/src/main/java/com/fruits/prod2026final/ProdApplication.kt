@@ -11,6 +11,7 @@ import coil3.serviceLoaderEnabled
 import com.fruits.database.di.databaseModule
 import com.fruits.debug.di.debugModule
 import com.fruits.debugPanel.di.debugPanelModule
+import com.fruits.logger.di.loggerModule
 import com.fruits.network.di.networkModule
 import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
@@ -49,6 +50,7 @@ class ProdApplication : Application() {
                 profileModule,
                 debugModule,
                 debugPanelModule,
+                loggerModule
             )
         }
     }

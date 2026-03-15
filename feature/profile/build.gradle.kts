@@ -11,4 +11,5 @@ dependencies {
     implementation(projects.core.session)
     implementation(libs.coil.compose)
     implementation(projects.core.domain)
+    implementation(projects.core.navigation)
 }

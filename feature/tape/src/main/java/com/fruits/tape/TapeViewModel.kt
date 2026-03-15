@@ -1,10 +1,10 @@
 package com.fruits.tape
 
-import com.fruits.debug.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
+import com.fruits.logger.Log
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

@@ -1,6 +1,6 @@
 package com.fruits.network.images.service
 
-import android.util.Log
+import com.fruits.logger.Log
 import com.fruits.network.Const
 import com.fruits.network.images.schema.DownloadUrlScheme
 import com.fruits.network.images.schema.DownloadUrlsRequest

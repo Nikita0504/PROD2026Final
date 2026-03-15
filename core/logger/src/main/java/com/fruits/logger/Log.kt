@@ -1,5 +1,6 @@
-package com.fruits.debug
+package com.fruits.logger
 
+import com.fruits.logger.BuildConfig
 import android.util.Log as AndroidLog
 
 object Log {
