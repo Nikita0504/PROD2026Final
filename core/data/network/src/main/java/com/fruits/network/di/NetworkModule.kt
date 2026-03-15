@@ -16,6 +16,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
 import com.fruits.network.images.service.ImageService
+import com.fruits.network.interactions.service.InteractionsService
 import com.fruits.network.recommendations.service.RecommendationsService
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -89,5 +90,6 @@ val networkModule = module {
     singleOf(::UserService)
     singleOf(::ImageService)
     singleOf(::RecommendationsService)
+    singleOf(::InteractionsService)
 }
 

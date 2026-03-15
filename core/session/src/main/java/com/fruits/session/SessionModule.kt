@@ -3,6 +3,8 @@ package com.fruits.session
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
+import com.fruits.domain.usecase.interactions.ReportUserUseCase
+import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.auth.GetProfileUseCase
 import com.fruits.domain.usecase.auth.LoginUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
@@ -48,4 +50,18 @@ val sessionModule = module {
     singleOf(::SessionManager)
 
     singleOf(::GetRecommendationsUseCase)
+
+    single {
+        SendUserActionUseCase(
+            interactionsRepository = get(),
+            tokenRepository = get(),
+        )
+    }
+
+    single {
+        ReportUserUseCase(
+            interactionsRepository = get(),
+            tokenRepository = get(),
+        )
+    }
 }
