@@ -38,6 +38,7 @@ class TapeViewModel(
 
     fun onEvent(event: TapeEvent) {
         when (event) {
+            is TapeEvent.OnTabSelected -> _state.update { it.copy(selectedTab = event.tab) }
             TapeEvent.OnWhyClicked -> _state.value.currentCard?.let {
                 viewModelScope.launch { _effects.emit(TapeEffect.ShowReasonSheet(it.reasonInFeed)) }
             }

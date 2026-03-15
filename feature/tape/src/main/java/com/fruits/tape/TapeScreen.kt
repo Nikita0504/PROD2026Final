@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,81 +102,138 @@ private fun TapeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
+                .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
         ) {
+            TabRow(
+                selectedTabIndex = when (state.selectedTab) {
+                    TapeTab.Recommendations -> 0
+                    TapeTab.Liked -> 1
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Tab(
+                    selected = state.selectedTab == TapeTab.Recommendations,
+                    onClick = { onEvent(TapeEvent.OnTabSelected(TapeTab.Recommendations)) },
+                    text = { Text("Рекомендации") },
+                )
+                Tab(
+                    selected = state.selectedTab == TapeTab.Liked,
+                    onClick = { onEvent(TapeEvent.OnTabSelected(TapeTab.Liked)) },
+                    text = { Text("Лайкнутые") },
+                )
+            }
+
             Box(
-                modifier = Modifier.size(cardWidth, cardHeight),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                when {
-                    state.isLoading -> {
+                when (state.selectedTab) {
+                    TapeTab.Liked -> {
+                        if (state.likedCards.isEmpty()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                TapeLikedEmptyTitle()
+                                Spacer(Modifier.height(8.dp))
+                                TapeLikedEmptySubtitle()
+                            }
+                        } else {
+                            // TODO: когда будет бэк — показывать ленту лайкнутых
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                TapeLikedEmptyTitle()
+                                Spacer(Modifier.height(8.dp))
+                                TapeLikedEmptySubtitle()
+                            }
+                        }
+                    }
+                    TapeTab.Recommendations -> {
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.size(cardWidth, cardHeight),
                             contentAlignment = Alignment.Center,
                         ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    state.error != null -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            TapeErrorTitle()
-                            Spacer(Modifier.height(12.dp))
-                            TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
-                        }
-                    }
-                    state.isEmpty -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            TapeEmptyTitle()
-                            Spacer(Modifier.height(8.dp))
-                            TapeEmptySubtitle()
-                            Spacer(Modifier.height(16.dp))
-                            TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
-                        }
-                    }
-                    state.currentCard != null -> {
-                        SwipeCard(
-                            modifier = Modifier.fillMaxSize(),
-                            state = cardState,
-                            onSwiped = { direction ->
-                                coroutineScope.launch {
-                                    cardState.reset()
-                                    onEvent(TapeEvent.OnCardSwiped(direction))
+                            when {
+                                state.isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
-                            },
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                TapeCardContent(
-                                    name = state.currentCard.name,
-                                    age = state.currentCard.age,
-                                    city = state.currentCard.city,
-                                    imageUrl = state.currentCard.imageUrl,
-                                )
-                                TapeCardOverlay(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .fillMaxWidth(),
-                                    name = state.currentCard.name,
-                                    age = state.currentCard.age,
-                                    city = state.currentCard.city,
-                                    isActionsEnabled = !state.isLoading,
-                                    onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
-                                    onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
-                                )
+                                state.error != null -> {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(24.dp),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        TapeErrorTitle()
+                                        Spacer(Modifier.height(12.dp))
+                                        TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
+                                    }
+                                }
+                                state.isEmpty -> {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(24.dp),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        TapeEmptyTitle()
+                                        Spacer(Modifier.height(8.dp))
+                                        TapeEmptySubtitle()
+                                        Spacer(Modifier.height(16.dp))
+                                        TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
+                                    }
+                                }
+                                state.currentCard != null -> {
+                                    SwipeCard(
+                                        modifier = Modifier.fillMaxSize(),
+                                        state = cardState,
+                                        onSwiped = { direction ->
+                                            coroutineScope.launch {
+                                                cardState.reset()
+                                                onEvent(TapeEvent.OnCardSwiped(direction))
+                                            }
+                                        },
+                                    ) {
+                                        Box(modifier = Modifier.fillMaxSize()) {
+                                            TapeCardContent(
+                                                name = state.currentCard.name,
+                                                age = state.currentCard.age,
+                                                city = state.currentCard.city,
+                                                imageUrl = state.currentCard.imageUrl,
+                                            )
+                                            TapeCardOverlay(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .fillMaxWidth(),
+                                                name = state.currentCard.name,
+                                                age = state.currentCard.age,
+                                                city = state.currentCard.city,
+                                                isActionsEnabled = !state.isLoading,
+                                                onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
+                                                onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -351,6 +410,24 @@ private fun TapeEmptyTitle() {
 private fun TapeEmptySubtitle() {
     Text(
         text = "Новые рекомендации появятся позже",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun TapeLikedEmptyTitle() {
+    Text(
+        text = "Лайкнутых пока нет",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun TapeLikedEmptySubtitle() {
+    Text(
+        text = "Здесь появятся анкеты, которые вы лайкнули",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
