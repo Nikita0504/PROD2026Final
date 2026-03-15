@@ -3,11 +3,13 @@ package com.fruits.domain.usecase.auth
 import com.fruits.domain.model.user.User
 import com.fruits.domain.model.user.UserProfileUpdate
 import com.fruits.domain.repository.TokenRepository
+import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
 
 class UpdateProfileUseCase(
     private val userNetworkRepository: UserNetworkRepository,
-    private val tokensRepository: TokenRepository
+    private val tokensRepository: TokenRepository,
+    private val userLocalRepository: UserLocalRepository
 ) {
     suspend operator fun invoke(
         description: String,
@@ -22,6 +24,6 @@ class UpdateProfileUseCase(
 
         val result = userNetworkRepository.patchProfile(updateData, accessToken)
 
-        return result
+        return result.onSuccess { user -> userLocalRepository.upsertUser(user) }
     }
 }

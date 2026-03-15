@@ -22,6 +22,8 @@ object UserDbMapper {
             secondName = secondName,
             email = email,
             avatarFileKey = avatarFileKey,
-            readyToGive = readyToGive
+            readyToGive = readyToGive,
+            description = description,
+            photoFileKeys = photoFileKeys
         )
 }

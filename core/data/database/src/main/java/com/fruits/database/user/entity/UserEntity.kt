@@ -11,5 +11,7 @@ data class UserEntity(
     @ColumnInfo(name = "second_name") val secondName: String,
     val email: String,
     @ColumnInfo(name = "avatar_file_key") val avatarFileKey: String?,
-    @ColumnInfo(name = "ready_to_give") val readyToGive: Boolean
+    @ColumnInfo(name = "ready_to_give") val readyToGive: Boolean,
+    @ColumnInfo(name = "photo_file_keys") val photoFileKeys: List<String>,
+    val description: String?
 )

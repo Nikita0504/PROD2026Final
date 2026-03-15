@@ -6,5 +6,7 @@ data class User(
     val secondName: String,
     val email: String,
     val avatarFileKey: String?,
-    val readyToGive: Boolean
+    val readyToGive: Boolean,
+    val description: String? = null,
+    val photoFileKeys: List<String> = listOf()
 )

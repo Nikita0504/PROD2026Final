@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +35,7 @@ import com.fruits.navigation.Route
 import com.fruits.navigation.TopLevelRoutes
 import com.fruits.profile.profileScreen
 import com.fruits.tape.tapeScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainNavGraph() {
@@ -38,7 +43,8 @@ fun MainNavGraph() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
 
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -47,6 +53,7 @@ fun MainNavGraph() {
         }
 
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 AnimatedVisibility(
                     visible = showBottomBar,
@@ -84,7 +91,9 @@ fun MainNavGraph() {
                                             .size(28.dp)
                                             .clip(androidx.compose.foundation.shape.CircleShape)
                                             .background(
-                                                if (selected) Color(0xFF4CAF50) else Color(0xFF9E9E9E)
+                                                if (selected) Color(0xFF4CAF50) else Color(
+                                                    0xFF9E9E9E
+                                                )
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -120,7 +129,13 @@ fun MainNavGraph() {
             ) {
                 tapeScreen()
                 chatScreen()
-                profileScreen()
+                profileScreen(
+                    onShowSnackbar = { message ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
+                )
             }
         }
     }

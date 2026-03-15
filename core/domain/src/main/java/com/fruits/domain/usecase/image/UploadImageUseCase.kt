@@ -1,4 +1,4 @@
-package com.fruits.domain.usecase.uploading
+package com.fruits.domain.usecase.image
 
 import com.fruits.domain.repository.ImageUploadUrlRepository
 import kotlinx.coroutines.flow.Flow

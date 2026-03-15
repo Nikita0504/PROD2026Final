@@ -1,6 +1,7 @@
 package com.fruits.network.user.service
 
 import android.util.Log
+import com.fruits.network.Const.serverUrl
 import com.fruits.network.user.schema.RefreshTokenSchema
 import com.fruits.network.user.schema.TokenReadSchema
 import com.fruits.network.user.schema.UserCreateSchema
@@ -18,7 +19,7 @@ import io.ktor.http.*
 class UserService(
     private val client: HttpClient,
 ) {
-    private val baseUrl = "https://cannily-infinite-boxfish.cloudpub.ru/api/v1/users"
+    private val baseUrl = "$serverUrl/api/v1/users"
 
     suspend fun register(body: UserCreateSchema): ApiResult<UserRegisterSchema> = safeCall {
         client.post("$baseUrl/auth/register") {

@@ -12,7 +12,9 @@ object UserMapper {
             secondName = secondName,
             email = email,
             avatarFileKey = avatarFileKey,
-            readyToGive = readyToGive
+            readyToGive = readyToGive,
+            description = description,
+            photoFileKeys = photoFileKeys
         )
 
     fun User.toSchema(): UserCreateSchema =
@@ -21,6 +23,6 @@ object UserMapper {
             secondName = secondName,
             email = email,
             password = "",
-            readyToGive = readyToGive
+            readyToGive = readyToGive,
         )
 }

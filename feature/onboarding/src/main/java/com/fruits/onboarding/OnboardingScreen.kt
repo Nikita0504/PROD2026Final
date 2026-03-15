@@ -1,14 +1,15 @@
 package com.fruits.onboarding
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,12 +48,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -57,25 +66,29 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import org.koin.compose.viewmodel.koinViewModel
 
-private const val TAG = "OnboardingScreen"
-
 @Composable
 fun OnboardingRoute(
-    viewModel: OnboardingViewModel = koinViewModel()
+    viewModel: OnboardingViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect by viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(effect) {
-        effect?.let {
-            Log.d(TAG, "Effect received: $it")
+        when (val e = effect) {
+            is OnboardingEffect.ShowError -> {
+                snackbarHostState.showSnackbar(e.message)
+            }
+
+            null -> Unit
         }
     }
 
     OnboardingScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onNavigateBack = viewModel::goBack
+        onNavigateBack = viewModel::goBack,
+        snackbarHostState = snackbarHostState
     )
 }
 
@@ -84,15 +97,13 @@ fun OnboardingRoute(
 private fun OnboardingScreen(
     state: OnboardingState,
     onEvent: (OnboardingEvent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
-    val scrollState = rememberScrollState()
     val colorScheme = MaterialTheme.colorScheme
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        Log.d(TAG, "Image picked: $uri")
         uri?.let { onEvent(OnboardingEvent.PickImage(it)) }
     }
 
@@ -120,189 +131,219 @@ private fun OnboardingScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = colorScheme.surface
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
             state.error?.let { error ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.errorContainer),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ErrorOutline,
-                            contentDescription = null,
-                            tint = colorScheme.onErrorContainer
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = error,
-                            color = colorScheme.onErrorContainer,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
+                ErrorCard(error = error)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Text(
-                text = "О себе",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorScheme.onSurface,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
+            DescriptionSection(
                 value = state.description,
-                onValueChange = {
-                    Log.d(TAG, "Description changed: ${it.length}")
-                    onEvent(OnboardingEvent.OnDescriptionChanged(it))
-                },
-                label = { Text("Краткое описание") },
-                placeholder = { Text("Расскажите немного о себе...") },
-                supportingText = {
-                    Text("${state.description.length} / 256")
-                },
-                isError = state.description.length > 256,
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 4,
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { onEvent(OnboardingEvent.OnDescriptionChanged(it)) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Фотографии",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorScheme.onSurface,
-                modifier = Modifier.align(Alignment.Start)
+            PhotosSection(
+                selectedImages = state.selectedImages,
+                uploadingImages = state.uploadingImages,
+                onRemove = { onEvent(OnboardingEvent.RemoveImage(it)) },
+                onRetry = { onEvent(OnboardingEvent.RetryUpload(it)) },
+                onAddPhoto = { launcher.launch("image/*") }
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Добавьте фото (от 256x256 до 2048x2048)",
-                style = MaterialTheme.typography.bodySmall,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (state.selectedImages.isNotEmpty() || state.uploadingImages.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    state.selectedImages.forEach { img ->
-                        ImageCard(
-                            uri = img.uri,
-                            isLoading = false,
-                            progress = 1f,
-                            onError = null,
-                            onRemove = {
-                                Log.d(TAG, "Remove selected image: ${img.uri}")
-                                onEvent(OnboardingEvent.RemoveImage(img.uri))
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    state.uploadingImages.forEach { img ->
-                        ImageCard(
-                            uri = img.uri,
-                            isLoading = true,
-                            progress = img.progress,
-                            onError = img.errorMessage,
-                            onRemove = {
-                                Log.d(TAG, "Remove uploading image: ${img.uri}")
-                                onEvent(OnboardingEvent.RemoveImage(img.uri))
-                            },
-                            onRetry = {
-                                Log.d(TAG, "Retry upload: ${img.uri}")
-                                if (img.errorMessage != null) onEvent(OnboardingEvent.RetryUpload(img.uri))
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            Surface(
-                onClick = {
-                    Log.d(TAG, "Add photo clicked")
-                    launcher.launch("image/*")
-                },
-                shape = RoundedCornerShape(16.dp),
-                color = colorScheme.secondaryContainer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .padding(top = 12.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AddPhotoAlternate,
-                            contentDescription = "Добавить фото",
-                            tint = colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Добавить фото",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSecondaryContainer
-                        )
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    Log.d(TAG, "Submit form clicked")
-                    onEvent(OnboardingEvent.SubmitForm)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = state.isFormValid && !state.isLoading,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Сохранение...")
-                } else {
-                    Text(
-                        text = "Завершить профиль",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
+            SubmitButton(
+                isLoading = state.isLoading,
+                isEnabled = state.isFormValid && !state.isLoading,
+                onClick = { onEvent(OnboardingEvent.SubmitForm) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun ErrorCard(error: String) {
+    val colorScheme = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.errorContainer),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ErrorOutline,
+                contentDescription = null,
+                tint = colorScheme.onErrorContainer
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = error,
+                color = colorScheme.onErrorContainer,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun DescriptionSection(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Text(
+        text = "О себе",
+        style = MaterialTheme.typography.titleMedium,
+        color = colorScheme.onSurface,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text("Краткое описание") },
+        placeholder = { Text("Расскажите немного о себе...") },
+        supportingText = {
+            Text("${value.length} / 256")
+        },
+        isError = value.length > 256,
+        modifier = Modifier.fillMaxWidth(),
+        maxLines = 4,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+@Composable
+private fun PhotosSection(
+    selectedImages: List<OnboardingImage>,
+    uploadingImages: List<UploadingImage>,
+    onRemove: (Uri) -> Unit,
+    onRetry: (Uri) -> Unit,
+    onAddPhoto: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Text(
+        text = "Фотографии",
+        style = MaterialTheme.typography.titleMedium,
+        color = colorScheme.onSurface,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        text = "Добавьте фото (от 256x256 до 2048x2048)",
+        style = MaterialTheme.typography.bodySmall,
+        color = colorScheme.onSurfaceVariant,
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+
+    val allImages = selectedImages + uploadingImages
+
+    if (allImages.isNotEmpty()) {
+        FlowRow(
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            selectedImages.forEach { img ->
+                ImageCard(
+                    uri = img.uri,
+                    isLoading = false,
+                    progress = 1f,
+                    onError = null,
+                    onRemove = { onRemove(img.uri) },
+                    modifier = Modifier.width(200.dp).padding(end = 12.dp)
+                )
+            }
+            uploadingImages.forEach { img ->
+                ImageCard(
+                    uri = img.uri,
+                    isLoading = true,
+                    progress = img.progress,
+                    onError = img.errorMessage,
+                    onRemove = { onRemove(img.uri) },
+                    onRetry = { onRetry(img.uri) },
+                    modifier = Modifier.width(200.dp).padding(end = 12.dp)
+                )
+            }
+        }
+    }
+
+    Surface(
+        onClick = onAddPhoto,
+        shape = RoundedCornerShape(16.dp),
+        color = colorScheme.secondaryContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .padding(top = 12.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AddPhotoAlternate,
+                    contentDescription = "Добавить фото",
+                    tint = colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Добавить фото",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSecondaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubmitButton(
+    isLoading: Boolean,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = isEnabled,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = colorScheme.onPrimary,
+                strokeWidth = 2.dp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Сохранение...")
+        } else {
+            Text(
+                text = "Завершить профиль",
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }
@@ -318,7 +359,6 @@ private fun ImageCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-
     Box(
         modifier = modifier
             .aspectRatio(1f)
@@ -346,17 +386,18 @@ private fun ImageCard(
                 ) {
                     CircularProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
                         color = MaterialTheme.colorScheme.primary
                     )
                     if (onError != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Icon(
                             imageVector = Icons.Default.ErrorOutline,
                             contentDescription = "Error",
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(20.dp)
                                 .clickable { onRetry?.invoke() }
                         )
                     }
@@ -368,9 +409,8 @@ private fun ImageCard(
             onClick = onRemove,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(4.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                     shape = CircleShape
                 )
         ) {
@@ -378,7 +418,7 @@ private fun ImageCard(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Удалить",
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(22.dp)
             )
         }
 
