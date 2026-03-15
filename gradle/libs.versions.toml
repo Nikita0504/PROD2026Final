@@ -88,6 +88,11 @@ truth = "1.1.5"
 kotlinxDatetime = "0.7.1"
 material = "1.10.0"
 
+# Firebase
+firebaseBom = "33.10.0"
+firebaseMessaging = "24.1.1"
+playServicesAuth = "21.3.0"
+
 
 [libraries]
 
@@ -204,6 +209,13 @@ kotlin-compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+# ─────────────────────────────────────
+# Firebase
+# ─────────────────────────────────────
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
 
 [bundles]

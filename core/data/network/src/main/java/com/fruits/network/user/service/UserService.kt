@@ -92,6 +92,22 @@ class UserService(
         result
     }
 
+    suspend fun updateFcmToken(token: String, accessToken: String): ApiResult<Unit> = safeCall {
+        Log.d(TAG, "Updating FCM token for user $token")
+
+        val result = client.post("$baseUrl/fcm-token") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+            jsonBody(com.fruits.network.user.schema.FcmTokenRequest(token))
+        }.toApiResult<Unit>()
+
+        when (result) {
+            is ApiResult.Success -> Log.i(TAG, "FCM token updated successfully")
+            is ApiResult.Error   -> Log.w(TAG, "FCM token update failed: code=${result.code}, message=${result.message}")
+        }
+
+        result
+    }
+
     private inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
         contentType(ContentType.Application.Json)
         setBody(body)

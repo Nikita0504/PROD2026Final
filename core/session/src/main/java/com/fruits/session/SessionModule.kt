@@ -1,8 +1,10 @@
 package com.fruits.session
 
+import com.fruits.domain.repository.FcmTokenProvider
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
+import com.fruits.domain.usecase.fcm.UpdateFcmTokenUseCase
 import com.fruits.domain.usecase.interactions.ReportUserUseCase
 import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.auth.GetProfileUseCase
@@ -16,6 +18,7 @@ import org.koin.dsl.module
 
 val sessionModule = module {
     singleOf(::LoginUseCase)
+    singleOf(::UpdateFcmTokenUseCase)
 
     single {
         GetProfileUseCase(
@@ -47,7 +50,17 @@ val sessionModule = module {
         )
     }
 
-    singleOf(::SessionManager)
+    single {
+        SessionManager(
+            loginUseCase = get(),
+            updateProfileUseCase = get(),
+            updateFcmTokenUseCase = get(),
+            fcmTokenProvider = get(),
+            tokenRepository = get(),
+            userLocalRepository = get(),
+            userNetworkRepository = get()
+        )
+    }
 
     singleOf(::GetRecommendationsUseCase)
 

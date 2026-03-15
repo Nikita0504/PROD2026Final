@@ -42,6 +42,7 @@ dependencies {
     implementation(projects.core.debug)
     implementation(projects.feature.debugPanel)
 
-    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 }
