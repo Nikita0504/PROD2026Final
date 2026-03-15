@@ -17,7 +17,6 @@ import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
 import com.fruits.profile.di.profileModule
 import com.fruits.repository.di.authRepositoryModule
-import com.fruits.repository.di.fcmTokenRepositoryModule
 import com.fruits.repository.di.imageUploadUrlRepositorModule
 import com.fruits.session.sessionModule
 import com.fruits.tape.di.tapeModule
@@ -40,7 +39,6 @@ class ProdApplication : Application() {
                 databaseModule,
                 networkModule,
                 authRepositoryModule,
-                fcmTokenRepositoryModule,
                 sessionModule,
                 appModule,
                 authModule,

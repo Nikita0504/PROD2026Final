@@ -7,7 +7,6 @@ import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
 import com.fruits.domain.usecase.auth.LoginUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
-import com.fruits.domain.usecase.fcm.UpdateFcmTokenUseCase
 import com.fruits.logger.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class SessionManager(
     private val loginUseCase: LoginUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
-    private val updateFcmTokenUseCase: UpdateFcmTokenUseCase,
     private val fcmTokenProvider: FcmTokenProvider,
     private val tokenRepository: TokenRepository,
     private val userLocalRepository: UserLocalRepository,
@@ -74,7 +72,11 @@ class SessionManager(
 
     suspend fun login(email: String, password: String): Result<Unit> {
         _sessionState.value = SessionState.Loading
-        val result = loginUseCase(email, password)
+
+        // Получаем FCM токен (может быть null если пользователь отказался от уведомлений)
+        val fcmToken = getFcmTokenOrNull()
+
+        val result = loginUseCase(email, password, fcmToken)
             .onSuccess { user ->
                 Log.d("SessionManager", "Login success")
                 if (user.readyToGive) {
@@ -82,9 +84,6 @@ class SessionManager(
                 } else {
                     _sessionState.value = SessionState.Onboarding()
                 }
-
-                // Отправляем FCM токен после успешного логина
-                sendFcmToken()
             }
             .onFailure { error ->
                 Log.d("SessionManager", "Login failed $error")
@@ -93,24 +92,18 @@ class SessionManager(
         return result.map { }
     }
 
-    private suspend fun sendFcmToken() {
-        try {
-            val fcmToken = fcmTokenProvider.getFcmToken()
-            if (fcmToken != null) {
-                updateFcmTokenUseCase(fcmToken)
-                    .onSuccess {
-                        Log.i("SessionManager", "FCM token sent to server successfully")
-                    }
-                    .onFailure { error ->
-                        // Не прерываем работу, просто логируем ошибку
-                        Log.w("SessionManager", "Failed to send FCM token to server: ${error.message}")
-                        Log.w("SessionManager", "This may be due to Firebase configuration issues. Check: 1) Firebase project setup 2) google-services.json 3) Internet connection")
-                    }
+    private suspend fun getFcmTokenOrNull(): String? {
+        return try {
+            val token = fcmTokenProvider.getFcmToken()
+            if (token != null) {
+                Log.d("SessionManager", "FCM token retrieved: ${token.take(20)}...")
             } else {
-                Log.w("SessionManager", "FCM token not available - Firebase may not be properly configured")
+                Log.w("SessionManager", "FCM token not available - user may have declined notifications or Firebase is not configured")
             }
+            token
         } catch (e: Exception) {
             Log.e("SessionManager", "Error getting FCM token", e)
+            null
         }
     }
 

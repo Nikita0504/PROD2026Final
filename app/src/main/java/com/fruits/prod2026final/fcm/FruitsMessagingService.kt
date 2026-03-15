@@ -18,7 +18,7 @@ class FruitsMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d(TAG, "New FCM token: ${token.take(20)}...")
-        // Token будет отправлен на сервер через SessionManager при авторизации
+        // Токен будет отправлен при следующей авторизации
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -35,7 +35,6 @@ class FruitsMessagingService : FirebaseMessagingService() {
 
         if (message.data.isNotEmpty()) {
             Log.d(TAG, "Message data: ${message.data}")
-            // Обработка data payload
         }
     }
 

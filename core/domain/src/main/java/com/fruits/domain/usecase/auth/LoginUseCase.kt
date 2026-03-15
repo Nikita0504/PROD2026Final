@@ -10,8 +10,12 @@ class LoginUseCase(
     private val userLocalRepository: UserLocalRepository,
     private val tokenRepository: TokenRepository
 ) {
-    suspend operator fun invoke(email: String, password: String): Result<User> {
-        val tokens = userNetworkRepository.login(email, password)
+    suspend operator fun invoke(
+        email: String,
+        password: String,
+        androidPushToken: String? = null
+    ): Result<User> {
+        val tokens = userNetworkRepository.login(email, password, androidPushToken)
             .getOrElse { return Result.failure(it) }
 
         tokenRepository.saveTokens(tokens.accessToken, tokens.refreshToken)

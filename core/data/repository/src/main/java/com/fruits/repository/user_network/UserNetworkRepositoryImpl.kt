@@ -19,9 +19,9 @@ class UserNetworkRepositoryImpl(
     private val mockDataService: MockDataService
 ) : UserNetworkRepository {
 
-    override suspend fun login(email: String, password: String): Result<Tokens> =
+    override suspend fun login(email: String, password: String, androidPushToken: String?): Result<Tokens> =
         mockOr(mockStorage, { mockDataService.tokensMock }) {
-            service.login(UserLoginSchema(email, password)).mapResult { it.toDomain() }
+            service.login(UserLoginSchema(email, password, androidPushToken)).mapResult { it.toDomain() }
         }
 
     override suspend fun getProfile(accessToken: String): Result<User> =
