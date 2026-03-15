@@ -4,11 +4,13 @@ import com.fruits.debugPanel.RecommendationMockEditState
 import com.fruits.domain.model.recommendations.Recommendations
 
 fun Recommendations.toEditState() = RecommendationMockEditState(
-    id = id,
-    authorName = authorName,
+    userId = userId,
+    firstName = firstName,
+    secondName = secondName,
+    age = age.toString(),
+    city = city,
     description = description,
-    likesCount = likesCount.toString(),
-    isLiked = isLiked
+    explanation = explanation.joinToString("\n"),
 )
 
 fun List<Recommendations>.toEditState() = map { it.toEditState() }

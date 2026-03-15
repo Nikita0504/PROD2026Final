@@ -2,6 +2,7 @@ package com.fruits.tape.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,11 +17,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fruits.debug.Log
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 
 @Composable
 fun TapeCardContent(
     name: String,
+    age: Int,
+    city: String,
     imageUrl: String,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -29,6 +34,15 @@ fun TapeCardContent(
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
+            onLoading = {
+                Log.d(TAG, "Image loading: url=$imageUrl")
+            },
+            onSuccess = {
+                Log.d(TAG, "Image loaded OK: url=$imageUrl")
+            },
+            onError = { state: AsyncImagePainter.State.Error ->
+                Log.e(TAG, "Image FAILED: url=$imageUrl  error=${state.result.throwable}", state.result.throwable)
+            },
         )
         Box(
             modifier = Modifier
@@ -42,13 +56,23 @@ fun TapeCardContent(
                 )
                 .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                fontSize = 20.sp,
-            )
+            Column {
+                Text(
+                    text = "$name, $age",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                )
+                Text(
+                    text = city,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 14.sp,
+                )
+            }
         }
     }
 }
+
+private const val TAG = "TapeCardContent"

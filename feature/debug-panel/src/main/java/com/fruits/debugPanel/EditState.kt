@@ -12,10 +12,12 @@ data class TokensMockEditState(
 )
 
 data class RecommendationMockEditState(
-    val id: String,
-    val authorName: String,
+    val userId: String,
+    val firstName: String,
+    val secondName: String,
+    val age: String,
+    val city: String,
     val description: String,
-    val likesCount: String,
-    val isLiked: Boolean
+    val explanation: String,
 )
 

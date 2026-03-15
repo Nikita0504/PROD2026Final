@@ -1,6 +1,6 @@
 package com.fruits.session
 
-import android.util.Log
+import com.fruits.debug.Log
 import com.fruits.domain.model.SessionState
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
@@ -10,6 +10,7 @@ import com.fruits.domain.usecase.auth.UpdateProfileUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+
 
 class SessionManager(
     private val loginUseCase: LoginUseCase,
@@ -34,30 +35,37 @@ class SessionManager(
     suspend fun restoreSession() {
         _sessionState.value = SessionState.Loading
 
-        val cachedUser = userLocalRepository.getCachedUser()
         val refreshToken = tokenRepository.getRefreshToken()
-
-        if (cachedUser == null || refreshToken.isEmpty()) {
-            clearSession()
+        if (refreshToken.isEmpty()) {
             _sessionState.value = SessionState.Unauthorized()
             return
         }
 
         userNetworkRepository.refreshToken(refreshToken)
             .onSuccess { tokens ->
-                tokenRepository.saveTokens(tokens.accessToken, tokens.refreshToken )
-
-                _sessionState.value = if (cachedUser.readyToGive) {
-                    SessionState.Authorized
+                tokenRepository.saveTokens(tokens.accessToken, tokens.refreshToken)
+                val user = userLocalRepository.getCachedUser()
+                _sessionState.value = if (user?.readyToGive == true)
+                    SessionState.Authorized else SessionState.Onboarding()
+            }
+            .onFailure { error ->
+                val isUnauthorized = error.message?.contains("401") == true
+                if (isUnauthorized) {
+                    clearSession()
+                    _sessionState.value = SessionState.Unauthorized()
                 } else {
-                    SessionState.Onboarding()
+                    val cached = userLocalRepository.getCachedUser()
+                    _sessionState.value = if (cached != null) {
+                        if (cached.readyToGive) SessionState.Authorized
+                        else SessionState.Onboarding()
+                    } else {
+                        SessionState.Unauthorized()
+                    }
                 }
             }
-            .onFailure {
-                clearSession()
-                _sessionState.value = SessionState.Unauthorized()
-            }
     }
+
+
 
 
     suspend fun login(email: String, password: String): Result<Unit> {

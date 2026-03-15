@@ -43,7 +43,7 @@ class UserService(
     suspend fun refreshToken(refreshToken: String): ApiResult<TokenReadSchema> = safeCall {
         Log.d(TAG, "Attempting token refresh, token present: ${refreshToken.isNotBlank()}")
 
-        val result = client.post("$baseUrl/users/token/refresh") {
+        val result = client.post("$baseUrl/token/refresh") {
             jsonBody(RefreshTokenSchema(refreshToken))
         }.toApiResult<TokenReadSchema>(
             401 to "Refresh токен недействителен"

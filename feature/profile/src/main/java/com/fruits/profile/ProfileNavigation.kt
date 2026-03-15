@@ -5,7 +5,6 @@ import androidx.navigation.compose.composable
 import com.fruits.navigation.Route
 
 fun NavGraphBuilder.profileScreen(
-    onNavigateToSettings: () -> Unit = {},
     onShowSnackbar: (String) -> Unit,
 ) {
     composable<Route.Profile> {

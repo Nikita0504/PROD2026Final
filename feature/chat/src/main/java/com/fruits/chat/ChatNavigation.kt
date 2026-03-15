@@ -4,8 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.fruits.navigation.Route
 
-fun NavGraphBuilder.chatScreen() {
+fun NavGraphBuilder.chatScreen(onBack: () -> Unit) {
     composable<Route.Chat> {
-        ChatRoute()
+        ChatRoute(onBack = onBack)
     }
 }

@@ -1,5 +1,6 @@
 package com.fruits.tape
 
+import com.fruits.debug.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.domain.model.recommendations.Recommendations
@@ -31,13 +32,13 @@ class TapeViewModel(
 
     fun onEvent(event: TapeEvent) {
         when (event) {
-            TapeEvent.OnWhyClicked -> _state.value.currentCard?.reasonInFeed?.let {
-                viewModelScope.launch { _effects.emit(TapeEffect.ShowReasonSheet(it)) }
+            TapeEvent.OnWhyClicked -> _state.value.currentCard?.let {
+                viewModelScope.launch { _effects.emit(TapeEffect.ShowReasonSheet(it.reasonInFeed)) }
             }
-            TapeEvent.OnAboutClicked -> _state.value.currentCard?.about?.let {
-                viewModelScope.launch { _effects.emit(TapeEffect.ShowAboutSheet(it)) }
+            TapeEvent.OnAboutClicked -> _state.value.currentCard?.let {
+                viewModelScope.launch { _effects.emit(TapeEffect.ShowAboutSheet(it.about)) }
             }
-            TapeEvent.OnCardSwiped -> nextCard()
+            is TapeEvent.OnCardSwiped -> nextCard()
             TapeEvent.OnRetry -> loadRecommendations()
         }
     }
@@ -47,35 +48,51 @@ class TapeViewModel(
             loadRecommendations()
             return
         }
-        _state.update { it.copy(currentCard = buffer.removeFirst(), error = null) }
+        _state.update { it.copy(currentCard = buffer.removeFirst(), error = null, isEmpty = false) }
     }
 
     private fun loadRecommendations() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null, isEmpty = false) }
             getRecommendationsUseCase()
                 .onSuccess { list ->
+                    Log.d(TAG, "=== Loaded ${list.size} recommendations ===")
+                    list.forEachIndexed { i, r ->
+                        Log.d(TAG, "[$i] ${r.firstName} ${r.secondName}, age=${r.age}, city=${r.city}")
+                        Log.d(TAG, "[$i] imageUrl=${r.photoFileKeys.firstOrNull()}")
+                        Log.d(TAG, "[$i] explanation(${r.explanation.size})=${r.explanation}")
+                    }
                     buffer.addAll(list.map { it.toCardItem() })
+                    val first = buffer.removeFirstOrNull()
+                    Log.d(TAG, "First card: userId=${first?.userId}, imageUrl=${first?.imageUrl}, reasons=${first?.reasonInFeed}")
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            currentCard = buffer.removeFirstOrNull()
+                            currentCard = first,
+                            isEmpty = first == null,
                         )
                     }
                 }
                 .onFailure { error ->
+                    Log.e(TAG, "Failed to load recommendations: ${error.message}")
                     _state.update {
                         it.copy(isLoading = false, error = error.message)
                     }
                 }
         }
     }
+
+    companion object {
+        private const val TAG = "TapeViewModel"
+    }
 }
 
 private fun Recommendations.toCardItem() = TapeCardItem(
-    id = id,
-    name = authorName,
-    imageUrl = imageUrl ?: "",
-    reasonInFeed = description,
+    userId = userId,
+    name = "$firstName $secondName",
+    age = age,
+    city = city,
+    imageUrl = photoFileKeys.firstOrNull() ?: "",
+    reasonInFeed = explanation,
     about = description
 )

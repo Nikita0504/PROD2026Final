@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fruits.chat.chatScreen
+import com.fruits.chatlist.chatListScreen
 import com.fruits.navigation.Route
 import com.fruits.navigation.TopLevelRoutes
 import com.fruits.profile.profileScreen
@@ -108,7 +109,7 @@ fun MainNavGraph() {
                                 label = {
                                     val label = when (route) {
                                         Route.Tape -> "Лента"
-                                        Route.Chat -> "Чат"
+                                        Route.ChatList -> "Чат"
                                         Route.Profile -> "Профиль"
                                         else -> ""
                                     }
@@ -128,7 +129,14 @@ fun MainNavGraph() {
                 )
             ) {
                 tapeScreen()
-                chatScreen()
+                chatListScreen(
+                    onNavigateToChatDetail = { chatId ->
+                        navController.navigate(Route.Chat(chatId = chatId))
+                    }
+                )
+                chatScreen(
+                    onBack = { navController.popBackStack() }
+                )
                 profileScreen(
                     onShowSnackbar = { message ->
                         scope.launch {

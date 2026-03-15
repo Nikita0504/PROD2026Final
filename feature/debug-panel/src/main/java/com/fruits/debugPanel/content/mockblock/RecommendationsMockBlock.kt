@@ -8,14 +8,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fruits.debugPanel.RecommendationMockEditState
@@ -65,14 +63,56 @@ private fun RecommendationItemBlock(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
-        // Заголовок элемента
         Text(
-            text = "№$index  ${state.authorName}",
+            text = "№$index  ${state.firstName} ${state.secondName}",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )
 
-        // Описание — многострочное
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = state.firstName,
+                onValueChange = { onStateChange(state.copy(firstName = it)) },
+                label = { Text("firstName") },
+                modifier = Modifier.weight(1f),
+                enabled = enabled,
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = state.secondName,
+                onValueChange = { onStateChange(state.copy(secondName = it)) },
+                label = { Text("secondName") },
+                modifier = Modifier.weight(1f),
+                enabled = enabled,
+                singleLine = true
+            )
+        }
+
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = state.age,
+                onValueChange = { onStateChange(state.copy(age = it)) },
+                label = { Text("age") },
+                modifier = Modifier.width(80.dp),
+                enabled = enabled,
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = state.city,
+                onValueChange = { onStateChange(state.copy(city = it)) },
+                label = { Text("city") },
+                modifier = Modifier.weight(1f),
+                enabled = enabled,
+                singleLine = true
+            )
+        }
+
         OutlinedTextField(
             value = state.description,
             onValueChange = { onStateChange(state.copy(description = it)) },
@@ -83,40 +123,14 @@ private fun RecommendationItemBlock(
             minLines = 2
         )
 
-        // Лайки + переключатель в одной строке, компактно
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = state.likesCount,
-                onValueChange = { onStateChange(state.copy(likesCount = it)) },
-                label = { Text("likes") },
-                modifier = Modifier.width(100.dp), // фиксированная компактная ширина
-                enabled = enabled,
-                singleLine = true
-            )
-
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = "isLiked",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (enabled)
-                        MaterialTheme.colorScheme.onSurface
-                    else
-                        MaterialTheme.colorScheme.outline
-                )
-                Switch(
-                    checked = state.isLiked,
-                    onCheckedChange = { onStateChange(state.copy(isLiked = it)) },
-                    enabled = enabled
-                )
-            }
-        }
+        OutlinedTextField(
+            value = state.explanation,
+            onValueChange = { onStateChange(state.copy(explanation = it)) },
+            label = { Text("explanation (по строкам)") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            maxLines = 3,
+            minLines = 1
+        )
     }
 }

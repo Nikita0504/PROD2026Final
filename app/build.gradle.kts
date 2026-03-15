@@ -15,6 +15,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.koin.android)
@@ -30,6 +32,7 @@ dependencies {
     implementation(projects.feature.onboarding)
     implementation(projects.feature.profile)
     implementation(projects.feature.chat)
+    implementation(projects.feature.chatList)
     implementation(projects.feature.tape)
     implementation(projects.core.domain)
     implementation(projects.core.debug)

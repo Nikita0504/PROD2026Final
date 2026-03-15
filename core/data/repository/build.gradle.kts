@@ -8,8 +8,9 @@ android {
     namespace = "com.fruits.repository"
 }
 
-dependencies{
+dependencies {
     implementation(projects.core.data.network)
     implementation(projects.core.data.database)
     implementation(projects.core.domain)
+    implementation(projects.core.debug)
 }

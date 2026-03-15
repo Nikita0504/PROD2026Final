@@ -1,8 +1,5 @@
 package com.fruits.chat
 
-/**
- * Модель сообщения в чате (пока без бэка).
- */
 data class ChatMessage(
     val id: String,
     val text: String,
@@ -13,6 +10,9 @@ data class ChatMessage(
 data class ChatState(
     val messages: List<ChatMessage> = emptyList(),
     val inputText: String = "",
+    val chatTitle: String = "Чат",
+    val isLoading: Boolean = false,
+    val error: String? = null,
 )
 
 sealed interface ChatEvent {

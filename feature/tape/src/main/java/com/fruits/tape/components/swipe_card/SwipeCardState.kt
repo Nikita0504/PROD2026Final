@@ -19,7 +19,8 @@ class SwipeCardState {
     private var lockedAxis: LockedAxis? = null
 
     var threshold = 400f
-    var upThreshold = 300f
+    /** Порог для свайпа вверх (пропустить). Сделан выше, чтобы реже срабатывал случайно. */
+    var upThreshold = 520f
 
     suspend fun drag(delta: Offset) {
         // Определяем ось один раз — по первому значимому движению пальца

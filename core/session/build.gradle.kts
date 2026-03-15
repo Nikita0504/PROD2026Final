@@ -11,4 +11,5 @@ android {
 dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.data.repository)
+    implementation(projects.core.debug)
 }

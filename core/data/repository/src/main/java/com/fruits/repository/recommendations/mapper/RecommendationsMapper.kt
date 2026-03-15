@@ -4,15 +4,15 @@ import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.network.recommendations.schema.RecommendationsSchema
 
 object RecommendationsMapper {
-    fun RecommendationsSchema.toDomain() : Recommendations = Recommendations(
-        id = id,
-        authorId = authorId,
-        authorName = authorName,
-        authorAvatarUrl = authorAvatarUrl,
-        imageUrl = imageUrl,
+    fun RecommendationsSchema.toDomain(): Recommendations = Recommendations(
+        userId = userId,
+        firstName = firstName,
+        secondName = secondName,
+        age = age,
+        city = city,
+        photoFileKeys = photoFileKeys,
         description = description,
-        likesCount = likesCount,
-        isLiked = isLiked
+        explanation = explanation
     )
 
     fun List<RecommendationsSchema>.toDomain(): List<Recommendations> = map { it.toDomain() }

@@ -50,7 +50,7 @@ fun LogsTab(logs: List<DebugLogStorage.LogEntry>, onClear: () -> Unit) {
             }
         } else {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                items(items = logs, key = { it.timestamp }) { entry ->
+                items(items = logs, key = { it.id }) { entry ->
                     LogEntryRow(entry)
                     HorizontalDivider()
                 }

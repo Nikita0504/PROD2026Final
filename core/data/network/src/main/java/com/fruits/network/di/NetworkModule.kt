@@ -15,6 +15,7 @@ import org.koin.dsl.module
 import com.fruits.network.BuildConfig
 import com.fruits.network.images.service.ImageService
 import com.fruits.network.recommendations.service.RecommendationsService
+import com.fruits.network.util.AndroidNetworkLogger
 import com.fruits.network.util.NetworkEventLogger
 import com.fruits.network.util.NoOpNetworkLogger
 import java.security.SecureRandom
@@ -26,7 +27,7 @@ import javax.net.ssl.X509TrustManager
 
 val networkModule = module {
 
-    single<NetworkEventLogger> { NoOpNetworkLogger }
+    single<NetworkEventLogger> { AndroidNetworkLogger }
 
     single {
         val eventLogger: NetworkEventLogger = get()

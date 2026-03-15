@@ -2,7 +2,7 @@ package com.fruits.chatlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fruits.domain.repository.ChatRepository
+import com.fruits.domain.model.chat.Chat
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,9 +11,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ChatListViewModel(
-    private val chatRepository: ChatRepository
-) : ViewModel() {
+class ChatListViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(ChatListState())
     val state: StateFlow<ChatListState> = _state.asStateFlow()
@@ -41,28 +39,38 @@ class ChatListViewModel(
             }
 
             try {
-                // Trigger network refresh if needed
-                if (isRefresh) {
-                    chatRepository.refreshChats()
-                }
-
-                // Observe data flow (In real app, you might collect this continuously in init)
-                // For simplicity in MVI action-triggered load:
-                // Assuming repository exposes a flow we can collect once or we rely on initial collection
-                // Better approach: Collect flow in init and update state, use refresh for force update
-
-                // Re-implementing proper flow collection pattern for MVI:
-                // The actual collection should happen in init, here we just trigger refresh
-                // But to satisfy the "Load" action logic:
-                if (!isRefresh) {
-                    // Initial load logic handled by init collection below
-                }
-
+                val mockChats = listOf(
+                    Chat(
+                        id = "1",
+                        name = "Поддержка",
+                        lastMessage = "Здравствуйте! Чем можем помочь?",
+                        timestamp = System.currentTimeMillis() - 3600_000,
+                        unreadCount = 2,
+                        avatarUrl = null,
+                    ),
+                    Chat(
+                        id = "2",
+                        name = "Команда проекта",
+                        lastMessage = "Ревью готово, можно мержить",
+                        timestamp = System.currentTimeMillis() - 86400_000,
+                        unreadCount = 0,
+                        avatarUrl = null,
+                    ),
+                    Chat(
+                        id = "3",
+                        name = "Друзья",
+                        lastMessage = "Вечером созвонимся?",
+                        timestamp = System.currentTimeMillis() - 300_000,
+                        unreadCount = 1,
+                        avatarUrl = null,
+                    ),
+                )
                 _state.update {
                     it.copy(
+                        chats = mockChats,
                         isLoading = false,
                         isRefreshing = false,
-                        error = null
+                        error = null,
                     )
                 }
             } catch (e: Exception) {
@@ -78,28 +86,9 @@ class ChatListViewModel(
         }
     }
 
-    // Proper Flow Collection for Real-time updates
-    init {
-        viewModelScope.launch {
-            chatRepository.observeChats().collect { chatList ->
-                _state.update {
-                    it.copy(
-                        chats = chatList,
-                        isLoading = false,
-                        isRefreshing = false
-                    )
-                }
-            }
-        }
-    }
-
     private fun navigateToChat(chatId: String) {
         viewModelScope.launch {
             _effect.send(ChatListEffect.NavigateToChatDetail(chatId))
         }
-    }
-
-    private suspend fun sendEffect(effect: ChatListEffect) {
-        _effect.send(effect)
     }
 }

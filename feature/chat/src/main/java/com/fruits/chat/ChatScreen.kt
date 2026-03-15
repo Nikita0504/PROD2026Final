@@ -4,12 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,16 +16,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,12 +42,14 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ChatRoute(
     viewModel: ChatViewModel = koinViewModel(),
+    onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ChatScreen(
         state = state,
         onEvent = viewModel::onEvent,
+        onBack = onBack
     )
 }
 
@@ -54,6 +58,8 @@ fun ChatRoute(
 private fun ChatScreen(
     state: ChatState,
     onEvent: (ChatEvent) -> Unit,
+    onBack: () -> Unit,
+
 ) {
     val listState = rememberLazyListState()
 
@@ -66,29 +72,58 @@ private fun ChatScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
+        topBar = {
+            TopAppBar(
+                title = { Text(state.chatTitle) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                    }
+                }
+            )
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            LazyColumn(
-                state = listState,
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                reverseLayout = true,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(16.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                items(
-                    items = state.messages.reversed(),
-                    key = { it.id },
-                ) { message ->
-                    ChatBubble(
-                        text = message.text,
-                        isOwn = message.isOwn,
-                    )
+                when {
+                    state.isLoading && state.messages.isEmpty() -> {
+                        CircularProgressIndicator()
+                    }
+                    state.error != null && state.messages.isEmpty() -> {
+                        Text(
+                            text = state.error ?: "Ошибка загрузки",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            reverseLayout = true,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(16.dp),
+                        ) {
+                            items(
+                                items = state.messages.reversed(),
+                                key = { it.id },
+                            ) { message ->
+                                ChatBubble(
+                                    text = message.text,
+                                    isOwn = message.isOwn,
+                                )
+                            }
+                        }
+                    }
                 }
             }
 

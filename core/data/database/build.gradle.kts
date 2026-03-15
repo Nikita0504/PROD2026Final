@@ -9,6 +9,7 @@ android {
     namespace = "com.fruits.database"
 }
 
-dependencies{
+dependencies {
     implementation(libs.security.crypto)
+    implementation(projects.core.debug)
 }

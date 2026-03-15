@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fruits.tape.components.*
 import com.fruits.tape.components.swipe_card.SwipeCard
+import com.fruits.tape.components.swipe_card.SwipeDirection
 import com.fruits.tape.components.swipe_card.rememberSwipeCardState
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -49,16 +50,14 @@ fun TapeRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effects = viewModel.effects
 
-    var sheetContent by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var reasonSheet by remember { mutableStateOf<List<String>?>(null) }
+    var aboutSheet by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) {
         effects.collect { effect ->
             when (effect) {
-                is TapeEffect.ShowReasonSheet -> {
-                    sheetContent = "Почему в ленте" to effect.reason
-                }
-                is TapeEffect.ShowAboutSheet -> {
-                    sheetContent = "О себе" to effect.about
-                }
+                is TapeEffect.ShowReasonSheet -> reasonSheet = effect.reasons
+                is TapeEffect.ShowAboutSheet -> aboutSheet = effect.about
             }
         }
     }
@@ -66,8 +65,10 @@ fun TapeRoute(
     TapeScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        sheetContent = sheetContent,
-        onDismissSheet = { sheetContent = null },
+        reasonSheet = reasonSheet,
+        aboutSheet = aboutSheet,
+        onDismissReasonSheet = { reasonSheet = null },
+        onDismissAboutSheet = { aboutSheet = null },
     )
 }
 
@@ -76,8 +77,10 @@ fun TapeRoute(
 private fun TapeScreen(
     state: TapeState,
     onEvent: (TapeEvent) -> Unit,
-    sheetContent: Pair<String, String>?,
-    onDismissSheet: () -> Unit,
+    reasonSheet: List<String>?,
+    aboutSheet: String?,
+    onDismissReasonSheet: () -> Unit,
+    onDismissAboutSheet: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val cardState = rememberSwipeCardState()
@@ -85,7 +88,7 @@ private fun TapeScreen(
     val cardWidth = (configuration.screenWidthDp - 48).dp.coerceAtMost(400.dp)
     val cardHeight = (configuration.screenHeightDp * 0.55f).toInt().dp
 
-    LaunchedEffect(state.currentCard?.id) {
+    LaunchedEffect(state.currentCard?.userId) {
         cardState.reset()
     }
 
@@ -138,19 +141,47 @@ private fun TapeScreen(
                             }
                         }
                     }
+                    state.isEmpty -> {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "Лента пуста",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Новые рекомендации появятся позже",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { onEvent(TapeEvent.OnRetry) }) {
+                                Text("Обновить")
+                            }
+                        }
+                    }
                     state.currentCard != null -> {
                         SwipeCard(
                             modifier = Modifier.fillMaxSize(),
                             state = cardState,
-                            onSwiped = {
+                            onSwiped = { direction ->
                                 coroutineScope.launch {
                                     cardState.reset()
-                                    onEvent(TapeEvent.OnCardSwiped)
+                                    onEvent(TapeEvent.OnCardSwiped(direction))
                                 }
                             },
                         ) {
                             TapeCardContent(
                                 name = state.currentCard.name,
+                                age = state.currentCard.age,
+                                city = state.currentCard.city,
                                 imageUrl = state.currentCard.imageUrl,
                             )
                         }
@@ -166,15 +197,72 @@ private fun TapeScreen(
                 enabled = state.currentCard != null && !state.isLoading,
             )
 
+//            if (state.currentCard != null && !state.isLoading) {
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Text(
+//                    text = "Влево — нет · Вправо — да · Вверх — пропустить",
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                )
+//            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
-    if (sheetContent != null) {
-        val (title, text) = sheetContent
+    if (reasonSheet != null) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
-            onDismissRequest = onDismissSheet,
+            onDismissRequest = onDismissReasonSheet,
+            sheetState = sheetState,
+            dragHandle = null,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = "Почему в ленте",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                if (reasonSheet.isEmpty()) {
+                    Text(
+                        text = "Причины не указаны",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    reasonSheet.forEach { reason ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = reason,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (aboutSheet != null) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = onDismissAboutSheet,
             sheetState = sheetState,
             dragHandle = null,
         ) {
@@ -185,14 +273,14 @@ private fun TapeScreen(
                     .padding(bottom = 32.dp),
             ) {
                 Text(
-                    text = title,
+                    text = "О себе",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = text,
+                    text = aboutSheet,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -203,4 +291,3 @@ private fun TapeScreen(
         }
     }
 }
-

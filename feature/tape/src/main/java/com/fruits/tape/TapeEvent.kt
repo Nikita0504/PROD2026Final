@@ -1,8 +1,10 @@
 package com.fruits.tape
 
+import com.fruits.tape.components.swipe_card.SwipeDirection
+
 sealed interface TapeEvent {
     data object OnWhyClicked : TapeEvent
     data object OnAboutClicked : TapeEvent
-    data object OnCardSwiped : TapeEvent
+    data class OnCardSwiped(val direction: SwipeDirection) : TapeEvent
     data object OnRetry : TapeEvent
 }

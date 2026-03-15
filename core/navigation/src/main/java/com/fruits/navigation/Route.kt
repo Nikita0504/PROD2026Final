@@ -13,7 +13,7 @@ sealed interface Route {
     @Serializable
     data object Tape : Route
     @Serializable
-    data object Chat : Route
+    data class Chat(val chatId: String) : Route
     @Serializable
     data object Profile : Route
     @Serializable

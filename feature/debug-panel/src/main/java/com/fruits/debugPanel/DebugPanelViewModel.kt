@@ -58,7 +58,7 @@ class DebugPanelViewModel(
 
     fun updateRecommendationState(updated: RecommendationMockEditState) {
         _recommendationsState.value = _recommendationsState.value.map {
-            if (it.id == updated.id) updated else it
+            if (it.userId == updated.userId) updated else it
         }
     }
 
@@ -66,12 +66,14 @@ class DebugPanelViewModel(
         mockDataService.updateRecommendations {
             val states = _recommendationsState.value
             replaceAll { rec ->
-                val state = states.find { it.id == rec.id } ?: return@replaceAll rec
+                val state = states.find { it.userId == rec.userId } ?: return@replaceAll rec
                 rec.copy(
-                    authorName = state.authorName,
+                    firstName = state.firstName,
+                    secondName = state.secondName,
+                    age = state.age.toIntOrNull() ?: rec.age,
+                    city = state.city,
                     description = state.description,
-                    likesCount = state.likesCount.toIntOrNull() ?: rec.likesCount,
-                    isLiked = state.isLiked
+                    explanation = state.explanation.lines().filter { it.isNotBlank() }
                 )
             }
         }

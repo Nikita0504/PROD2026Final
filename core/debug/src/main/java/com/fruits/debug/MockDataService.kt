@@ -34,74 +34,74 @@ class MockDataService {
 
     var recommendations: List<Recommendations> = listOf(
         Recommendations(
-            id = "rec_001",
-            authorId = "user_101",
-            authorName = "Алексей Смирнов",
-            authorAvatarUrl = "https://s13.stc.yc.kpcdn.net/share/i/12/7888060/wr-960.webp",
-            imageUrl = "https://s13.stc.yc.kpcdn.net/share/i/12/7888060/wr-960.webp",
-            description = "Свежие яблоки прямо с дачи 🍎 Сорт Антоновка, очень сочные. Отдам соседям или всем желающим!",
-            likesCount = 47,
-            isLiked = false
+            userId = "user_101",
+            firstName = "Алексей",
+            secondName = "Смирнов",
+            age = 32,
+            city = "Москва",
+            photoFileKeys = listOf("https://s13.stc.yc.kpcdn.net/share/i/12/7888060/wr-960.webp"),
+            description = "Свежие яблоки прямо с дачи. Сорт Антоновка, очень сочные. Отдам соседям или всем желающим!",
+            explanation = listOf("Похожие интересы", "Рядом с вами")
         ),
         Recommendations(
-            id = "rec_002",
-            authorId = "user_102",
-            authorName = "Мария Иванова",
-            authorAvatarUrl = "https://i.pravatar.cc/150?img=5",
-            imageUrl = "https://i.stena.ee/21/2022-02-06_080725.jpg",
-            description = "Урожай клубники — больше, чем ожидала 🍓 Вся сладкая, без нитратов. Забирайте бесплатно!",
-            likesCount = 134,
-            isLiked = true
+            userId = "user_102",
+            firstName = "Мария",
+            secondName = "Иванова",
+            age = 27,
+            city = "Санкт-Петербург",
+            photoFileKeys = listOf("https://i.stena.ee/21/2022-02-06_080725.jpg"),
+            description = "Урожай клубники — больше, чем ожидала. Вся сладкая, без нитратов. Забирайте бесплатно!",
+            explanation = listOf("Активный пользователь")
         ),
         Recommendations(
-            id = "rec_003",
-            authorId = "user_103",
-            authorName = "Дмитрий Козлов",
-            authorAvatarUrl = "https://news.store.rambler.ru/img/2f026387a8b128a22c0490bf57b2cf68?img-format=auto&img-1-resize=height:400,fit:max&img-2-filter=sharpen",
-            imageUrl = "https://news.store.rambler.ru/img/2f026387a8b128a22c0490bf57b2cf68?img-format=auto&img-1-resize=height:400,fit:max&img-2-filter=sharpen",
-            description = "Кабачки и огурцы — некуда девать 🥒 Выращено без химии на своём огороде в Подмосковье.",
-            likesCount = 89,
-            isLiked = false
+            userId = "user_103",
+            firstName = "Дмитрий",
+            secondName = "Козлов",
+            age = 45,
+            city = "Подмосковье",
+            photoFileKeys = listOf("https://news.store.rambler.ru/img/2f026387a8b128a22c0490bf57b2cf68?img-format=auto&img-1-resize=height:400,fit:max&img-2-filter=sharpen"),
+            description = "Кабачки и огурцы — некуда девать. Выращено без химии на своём огороде.",
+            explanation = listOf("Рядом с вами")
         ),
         Recommendations(
-            id = "rec_004",
-            authorId = "user_104",
-            authorName = "Ольга Петрова",
-            authorAvatarUrl = "https://cdn.fishki.net/upload/post/2020/05/02/3306035/tn/risunok1.jpg",
-            imageUrl = "https://cdn.fishki.net/upload/post/2020/05/02/3306035/tn/risunok1.jpg",
-            description = "Домашнее варенье из черники 🫐 Сварила с запасом, готова поделиться парой баночек.",
-            likesCount = 212,
-            isLiked = true
+            userId = "user_104",
+            firstName = "Ольга",
+            secondName = "Петрова",
+            age = 38,
+            city = "Казань",
+            photoFileKeys = listOf("https://cdn.fishki.net/upload/post/2020/05/02/3306035/tn/risunok1.jpg"),
+            description = "Домашнее варенье из черники. Сварила с запасом, готова поделиться парой баночек.",
+            explanation = listOf("Похожие интересы", "Популярный пользователь")
         ),
         Recommendations(
-            id = "rec_005",
-            authorId = "user_105",
-            authorName = "Игорь Новиков",
-            authorAvatarUrl = "https://www.menslife.com/upload/iblock/0d8/realnye_lyudi_obladayushchie_supersposobnostyami.jpg",
-            imageUrl = "https://www.menslife.com/upload/iblock/0d8/realnye_lyudi_obladayushchie_supersposobnostyami.jpg",
-            description = "Груши сорта Конференц — упали с дерева, но целые 🍐 Нужно быстро забрать, не будут долго лежать.",
-            likesCount = 63,
-            isLiked = false
+            userId = "user_105",
+            firstName = "Игорь",
+            secondName = "Новиков",
+            age = 51,
+            city = "Новосибирск",
+            photoFileKeys = listOf("https://www.menslife.com/upload/iblock/0d8/realnye_lyudi_obladayushchie_supersposobnostyami.jpg"),
+            description = "Груши сорта Конференц — упали с дерева, но целые. Нужно быстро забрать, не будут долго лежать.",
+            explanation = listOf("Рядом с вами")
         ),
         Recommendations(
-            id = "rec_006",
-            authorId = "user_106",
-            authorName = "Екатерина Белова",
-            authorAvatarUrl = "https://www.film.ru/sites/default/files/styles/thumb_1024x450/public/trailers_frame/x-men.jpg",
-            imageUrl = "https://www.film.ru/sites/default/files/styles/thumb_1024x450/public/trailers_frame/x-men.jpg",
-            description = "Зелень: укроп, петрушка, базилик 🌿 Свежесрезанная, пучками. Самовывоз из Щёлково.",
-            likesCount = 31,
-            isLiked = false
+            userId = "user_106",
+            firstName = "Екатерина",
+            secondName = "Белова",
+            age = 29,
+            city = "Щёлково",
+            photoFileKeys = listOf("https://www.film.ru/sites/default/files/styles/thumb_1024x450/public/trailers_frame/x-men.jpg"),
+            description = "Зелень: укроп, петрушка, базилик. Свежесрезанная, пучками. Самовывоз.",
+            explanation = listOf("Активный пользователь")
         ),
         Recommendations(
-            id = "rec_008",
-            authorId = "user_108",
-            authorName = "Наталья Орлова",
-            authorAvatarUrl = "https://ir.ozone.ru/s3/multimedia-p/6651744109.jpg4",
-            imageUrl = "https://ir.ozone.ru/s3/multimedia-p/6651744109.jpg",
-            description = "Персики из Краснодара 🍑 Привезли родственники, не осилим. Очень спелые, нужно забрать сегодня.",
-            likesCount = 178,
-            isLiked = false
+            userId = "user_108",
+            firstName = "Наталья",
+            secondName = "Орлова",
+            age = 34,
+            city = "Краснодар",
+            photoFileKeys = listOf("https://ir.ozone.ru/s3/multimedia-p/6651744109.jpg"),
+            description = "Персики из Краснодара. Привезли родственники, не осилим. Очень спелые, нужно забрать сегодня.",
+            explanation = listOf("Рядом с вами", "Похожие интересы")
         )
     )
 
