@@ -106,12 +106,14 @@ class ChatViewModel(
             .onSuccess { detail ->
                 val avatarUrl = resolveAvatarUrl(detail)
                 val messages = mapMessages(detail)
+                val isBlocked = detail.status.equals("BLOCKED", ignoreCase = true)
                 _state.update {
                     it.copy(
                         chatTitle = detail.title,
                         messages = messages,
                         targetUserId = detail.counterpartUserId,
                         counterpartAvatarUrl = avatarUrl,
+                        isBlocked = isBlocked,
                         isLoading = false,
                         error = null,
                         isPollingError = false,
@@ -145,7 +147,8 @@ class ChatViewModel(
                         .map { it.id }
                         .toSet()
                     val merged = mergeMessages(_state.value.messages, newMessages, currentIds)
-                    _state.update { it.copy(messages = merged, isPollingError = false) }
+                    val isBlocked = detail.status.equals("BLOCKED", ignoreCase = true)
+                    _state.update { it.copy(messages = merged, isBlocked = isBlocked, isPollingError = false) }
                 }
                 .onFailure {
                     _state.update { it.copy(isPollingError = true) }
@@ -160,12 +163,18 @@ class ChatViewModel(
         fresh: List<ChatMessage>,
         localIds: Set<String>,
     ): List<ChatMessage> {
-        val freshById = fresh.associateBy { it.id }
         val result = mutableListOf<ChatMessage>()
         result.addAll(fresh)
-        current.filter { it.id in localIds }.forEach { local ->
-            if (!freshById.containsKey(local.id)) {
+        val locals = current.filter { it.id in localIds }
+        val matchedFresh = BooleanArray(fresh.size)
+        locals.forEach { local ->
+            val idx = fresh.indices.indexOfFirst { i ->
+                !matchedFresh[i] && fresh[i].isOwn && fresh[i].text == local.text
+            }
+            if (idx == -1) {
                 result.add(local)
+            } else {
+                matchedFresh[idx] = true
             }
         }
         return result.sortedBy { it.timestampMillis }

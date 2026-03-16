@@ -71,6 +71,7 @@ class InteractionsService(
 
             val result: ApiResult<Unit> = client.post("$baseUrl/interactions/reports") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
                 setBody(request)
             }.toApiResult<Unit>(
                 401 to "Пользователь не авторизован",

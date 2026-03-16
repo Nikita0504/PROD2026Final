@@ -3,6 +3,7 @@ package com.fruits.settings
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -143,23 +146,57 @@ internal fun ProfileSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            DescriptionField(
-                value = state.editedDescription,
-                onValueChange = { onEvent(ProfileSettingsEvent.OnDescriptionChanged(it)) },
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            PhotosSectionHeader()
-            Spacer(modifier = Modifier.height(8.dp))
-            PhotosGridSection(
-                images = state.displayedImages + state.pendingImages,
-                onRemove = { onEvent(ProfileSettingsEvent.RemoveImage(it)) },
-                onRetry = { onEvent(ProfileSettingsEvent.RetryUpload(it)) },
-                onAddImageClick = onAddImageClick,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "О себе",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    DescriptionField(
+                        value = state.editedDescription,
+                        onValueChange = { onEvent(ProfileSettingsEvent.OnDescriptionChanged(it)) },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    PhotosSectionHeader()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PhotosGridSection(
+                        images = state.displayedImages + state.pendingImages,
+                        onRemove = { onEvent(ProfileSettingsEvent.RemoveImage(it)) },
+                        onRetry = { onEvent(ProfileSettingsEvent.RetryUpload(it)) },
+                        onAddImageClick = onAddImageClick,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             if (state.hasChanges && !state.isSaving) {
                 SaveButton(
                     onClick = { onEvent(ProfileSettingsEvent.SaveChanges) },
@@ -169,6 +206,8 @@ internal fun ProfileSettingsScreen(
             if (state.isSaving) {
                 SavingIndicator()
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -181,19 +220,20 @@ internal fun DescriptionField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("О себе") },
         placeholder = { Text("Расскажите немного о себе...") },
         modifier = Modifier.fillMaxWidth(),
-        maxLines = 4,
+        minLines = 3,
+        maxLines = 5,
         supportingText = {
             Text(
                 text = "${value.length} / 256",
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        shape = RoundedCornerShape(12.dp),
-        isError = value.isBlank()
+        shape = RoundedCornerShape(14.dp),
     )
 }
 
@@ -210,7 +250,7 @@ internal fun PhotosSectionHeader() {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Минимум 1 фото, максимум 5",
+            text = "Минимум 1, максимум 5 фото",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -225,64 +265,70 @@ internal fun PhotosGridSection(
     onAddImageClick: () -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val canAddMore = images.count { !it.isPending } < 5
 
-    if (images.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Добавьте минимум 1 фотографию",
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.error
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        images.forEach { image ->
+            ImageItem(
+                image = image,
+                onRemove = { onRemove(image.id) },
+                onRetry = { onRetry(image.id) }
             )
         }
-    } else {
-        FlowRow(
-            horizontalArrangement = Arrangement.Center,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            images.forEach { image ->
-                ImageItem(
-                    image = image,
-                    onRemove = { onRemove(image.id) },
-                    onRetry = { onRetry(image.id) }
-                )
-            }
 
-            if (images.count { !it.isPending } < 5) {
-                Surface(
-                    onClick = onAddImageClick,
-                    modifier = Modifier
-                        .width(200.dp)
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    color = colorScheme.secondaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Добавить фото",
-                                tint = colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Добавить",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSecondaryContainer,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
+        if (canAddMore) {
+            AddImageButton(
+                isEmpty = images.isEmpty(),
+                onClick = onAddImageClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddImageButton(
+    isEmpty: Boolean,
+    onClick: () -> Unit,
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .width(if (isEmpty) 200.dp else 120.dp)
+            .aspectRatio(1f),
+        shape = RoundedCornerShape(16.dp),
+        color = colorScheme.primaryContainer.copy(alpha = 0.5f),
+        border = BorderStroke(
+            width = 2.dp,
+            color = colorScheme.primary.copy(alpha = 0.5f),
+        ),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Добавить фото",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(if (isEmpty) 48.dp else 32.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (isEmpty) "Добавить фото" else "Добавить",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -297,8 +343,8 @@ internal fun SaveButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(12.dp),
+            .height(52.dp),
+        shape = RoundedCornerShape(14.dp),
         enabled = isEnabled
     ) {
         Text(
@@ -316,7 +362,7 @@ internal fun SavingIndicator() {
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.primaryContainer
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier
@@ -348,11 +394,10 @@ internal fun ImageItem(
 ) {
     Box(
         modifier = Modifier
-            .width(200.dp)
+            .width(120.dp)
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(end = 8.dp)
     ) {
         if (image.uri != null) {
             AsyncImage(

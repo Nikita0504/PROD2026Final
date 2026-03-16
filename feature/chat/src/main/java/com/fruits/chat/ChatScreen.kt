@@ -164,7 +164,7 @@ fun ChatScreen(
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize().testTag("chat_messages_list"),
-                            reverseLayout = true,
+                            reverseLayout = false,
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(16.dp),
                         ) {
