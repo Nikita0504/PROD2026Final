@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,7 +56,7 @@ fun ChatRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatScreen(
+fun ChatScreen(
     state: ChatState,
     onEvent: (ChatEvent) -> Unit,
     onBack: () -> Unit,
@@ -74,9 +75,9 @@ private fun ChatScreen(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
-                title = { Text(state.chatTitle) },
+                title = { Text(state.chatTitle, modifier = Modifier.testTag("chat_title")) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = onBack, modifier = Modifier.testTag("chat_back_button")) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
                     }
                 }
@@ -96,19 +97,20 @@ private fun ChatScreen(
             ) {
                 when {
                     state.isLoading && state.messages.isEmpty() -> {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(modifier = Modifier.testTag("chat_progress"))
                     }
                     state.error != null && state.messages.isEmpty() -> {
                         Text(
                             text = state.error,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag("chat_error_text")
                         )
                     }
                     else -> {
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().testTag("chat_messages_list"),
                             reverseLayout = true,
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(16.dp),
@@ -120,6 +122,7 @@ private fun ChatScreen(
                                 ChatBubble(
                                     text = message.text,
                                     isOwn = message.isOwn,
+                                    modifier = Modifier.testTag("message_bubble_${message.id}")
                                 )
                             }
                         }
@@ -137,7 +140,7 @@ private fun ChatScreen(
                 OutlinedTextField(
                     value = state.inputText,
                     onValueChange = { onEvent(ChatEvent.InputChanged(it)) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).testTag("chat_input_field"),
                     placeholder = { Text("Сообщение") },
                     maxLines = 4,
                     shape = RoundedCornerShape(24.dp),
@@ -153,7 +156,8 @@ private fun ChatScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .testTag("chat_send_button"),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Send,
@@ -170,9 +174,10 @@ private fun ChatScreen(
 private fun ChatBubble(
     text: String,
     isOwn: Boolean,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isOwn) Arrangement.End else Arrangement.Start,
     ) {
         Surface(
@@ -197,7 +202,7 @@ private fun ChatBubble(
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp).testTag("bubble_text"),
             )
         }
     }

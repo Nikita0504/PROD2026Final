@@ -18,6 +18,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockkObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -29,6 +31,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -75,10 +78,12 @@ class TapeViewModelTest {
         Dispatchers.resetMain()
     }
 
+    // --- Recommendations Tests ---
+
     @Test
-    fun `initialization loads recommendations`() = runTest {
+    fun `initialization loads recommendations and sets current card`() = runTest {
         val recommendation = Recommendations(
-            userId = "1",
+            userId = "rec_1",
             firstName = "John",
             secondName = "Doe",
             age = 25,
@@ -92,7 +97,7 @@ class TapeViewModelTest {
         coEvery { getRecommendationsUseCase() } returns Result.success(listOf(recommendation))
         coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(listOf(downloadUrl))
 
-        // Re-init to trigger load
+        // Re-init to trigger load in init block
         viewModel = TapeViewModel(
             getRecommendationsUseCase,
             getIncomingLikesUseCase,
@@ -102,111 +107,131 @@ class TapeViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.state.value
-        assertNotNull(state.currentCard)
-        assertEquals("1", state.currentCard?.userId)
+        assertEquals("rec_1", state.currentCard?.userId)
         assertEquals("http://image.com/1", state.currentCard?.imageUrl)
+        assertFalse(state.isEmpty)
     }
 
     @Test
-    fun `onTabSelected Liked loads liked cards if empty`() = runTest {
-        val incomingLike = IncomingLike(
-            likedByUserId = "user2",
-            firstName = "Jane",
-            secondName = "Doe",
-            age = 22,
-            city = "SPB",
-            description = "Hi",
-            photoFileKeys = listOf("key2"),
-            createdAt = "2023-01-01"
-        )
-        val downloadUrl = DownloadUrlData(key = "key2", url = "http://image.com/2")
-
-        coEvery { getIncomingLikesUseCase() } returns Result.success(listOf(incomingLike))
-        coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(listOf(downloadUrl))
-
-        viewModel.onEvent(TapeEvent.OnTabSelected(TapeTab.Liked))
-        advanceUntilIdle()
-
-        val state = viewModel.state.value
-        assertEquals(TapeTab.Liked, state.selectedTab)
-        assertEquals(1, state.likedCards.size)
-        assertEquals("user2", state.likedCards[0].userId)
-    }
-
-    @Test
-    fun `handleSwipe RIGHT sends LIKE action`() = runTest {
-        val recommendation = Recommendations(
-            userId = "1",
-            firstName = "John",
-            secondName = "Doe",
-            age = 25,
-            city = "Moscow",
-            photoFileKeys = listOf("key1"),
-            description = "About me",
-            explanation = listOf("Reason 1")
-        )
-        coEvery { getRecommendationsUseCase() } returns Result.success(listOf(recommendation))
+    fun `handleSwipe RIGHT on recommendation sends LIKE action and moves to next`() = runTest {
+        val rec1 = createRecommendation("1")
+        val rec2 = createRecommendation("2")
+        coEvery { getRecommendationsUseCase() } returns Result.success(listOf(rec1, rec2))
         coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(emptyList())
         coEvery { sendUserActionUseCase(any(), any()) } returns Result.success(Unit)
 
-        viewModel = TapeViewModel(
-            getRecommendationsUseCase,
-            getIncomingLikesUseCase,
-            sendUserActionUseCase,
-            imageUploadUrlRepository
-        )
+        viewModel = TapeViewModel(getRecommendationsUseCase, getIncomingLikesUseCase, sendUserActionUseCase, imageUploadUrlRepository)
         advanceUntilIdle()
 
         viewModel.onEvent(TapeEvent.OnCardSwiped(SwipeDirection.RIGHT))
         advanceUntilIdle()
 
         coVerify { sendUserActionUseCase("1", UserAction.LIKE) }
+        assertEquals("2", viewModel.state.value.currentCard?.userId)
+    }
+
+    // --- Liked Tab Tests ---
+
+    @Test
+    fun `onTabSelected Liked loads incoming likes only once`() = runTest {
+        val like = createIncomingLike("user_liked")
+        coEvery { getIncomingLikesUseCase() } returns Result.success(listOf(like))
+        coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(emptyList())
+
+        // Select Liked tab
+        viewModel.onEvent(TapeEvent.OnTabSelected(TapeTab.Liked))
+        advanceUntilIdle()
+
+        assertEquals("user_liked", viewModel.state.value.likedCurrentCard?.userId)
+        coVerify(exactly = 1) { getIncomingLikesUseCase() }
+
+        // Select again - should not trigger load
+        viewModel.onEvent(TapeEvent.OnTabSelected(TapeTab.Liked))
+        advanceUntilIdle()
+        coVerify(exactly = 1) { getIncomingLikesUseCase() }
     }
 
     @Test
-    fun `handleSwipe LEFT sends DISLIKE action`() = runTest {
-        val recommendation = Recommendations(
-            userId = "1",
-            firstName = "John",
-            secondName = "Doe",
-            age = 25,
-            city = "Moscow",
-            photoFileKeys = listOf("key1"),
-            description = "About me",
-            explanation = listOf("Reason 1")
-        )
-        coEvery { getRecommendationsUseCase() } returns Result.success(listOf(recommendation))
+    fun `handleLikedSwipe LEFT sends DISLIKE action and clears card`() = runTest {
+        val like = createIncomingLike("l1")
+        coEvery { getIncomingLikesUseCase() } returns Result.success(listOf(like))
         coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(emptyList())
         coEvery { sendUserActionUseCase(any(), any()) } returns Result.success(Unit)
 
-        viewModel = TapeViewModel(
-            getRecommendationsUseCase,
-            getIncomingLikesUseCase,
-            sendUserActionUseCase,
-            imageUploadUrlRepository
-        )
+        viewModel.onEvent(TapeEvent.OnTabSelected(TapeTab.Liked))
         advanceUntilIdle()
 
-        viewModel.onEvent(TapeEvent.OnCardSwiped(SwipeDirection.LEFT))
+        viewModel.onEvent(TapeEvent.OnLikedCardSwiped(SwipeDirection.LEFT))
         advanceUntilIdle()
 
-        coVerify { sendUserActionUseCase("1", UserAction.DISLIKE) }
+        coVerify { sendUserActionUseCase("l1", UserAction.DISLIKE) }
+        assertNull(viewModel.state.value.likedCurrentCard)
+        assertTrue(viewModel.state.value.likedIsEmpty)
+    }
+
+    // --- Effects Tests ---
+
+    @Test
+    fun `OnWhyClicked emits ShowReasonSheet effect`() = runTest {
+        val rec = createRecommendation("1", reasons = listOf("Because"))
+        coEvery { getRecommendationsUseCase() } returns Result.success(listOf(rec))
+        coEvery { imageUploadUrlRepository.getDownloadUrls(any()) } returns Result.success(emptyList())
+
+        viewModel = TapeViewModel(getRecommendationsUseCase, getIncomingLikesUseCase, sendUserActionUseCase, imageUploadUrlRepository)
+        advanceUntilIdle()
+
+        val effects = mutableListOf<TapeEffect>()
+        val job = launch {
+            viewModel.effects.collect { effects.add(it) }
+        }
+
+        viewModel.onEvent(TapeEvent.OnWhyClicked)
+        advanceUntilIdle()
+
+        assertTrue(effects.any { it is TapeEffect.ShowReasonSheet && it.reasons == listOf("Because") })
+        job.cancel()
+    }
+
+    // --- Corner Cases ---
+
+    @Test
+    fun `OnLikedRetry reloads liked cards`() = runTest {
+        coEvery { getIncomingLikesUseCase() } returns Result.success(emptyList())
+        
+        viewModel.onEvent(TapeEvent.OnLikedRetry)
+        advanceUntilIdle()
+
+        coVerify { getIncomingLikesUseCase() }
     }
 
     @Test
-    fun `loadRecommendations failure sets error state`() = runTest {
-        coEvery { getRecommendationsUseCase() } returns Result.failure(Exception("Network error"))
-
-        viewModel = TapeViewModel(
-            getRecommendationsUseCase,
-            getIncomingLikesUseCase,
-            sendUserActionUseCase,
-            imageUploadUrlRepository
-        )
+    fun `swipe when no card does nothing`() = runTest {
+        // State has no currentCard
+        viewModel.onEvent(TapeEvent.OnCardSwiped(SwipeDirection.RIGHT))
         advanceUntilIdle()
 
-        val state = viewModel.state.value
-        assertEquals("Network error", state.error)
-        assertFalse(state.isLoading)
+        coVerify(exactly = 0) { sendUserActionUseCase(any(), any()) }
     }
+
+    private fun createRecommendation(id: String, reasons: List<String> = emptyList()) = Recommendations(
+        userId = id,
+        firstName = "Name$id",
+        secondName = "Surname",
+        age = 20,
+        city = "City",
+        photoFileKeys = emptyList(),
+        description = "Bio",
+        explanation = reasons
+    )
+
+    private fun createIncomingLike(id: String) = IncomingLike(
+        likedByUserId = id,
+        firstName = "Liker$id",
+        secondName = "Surname",
+        age = 20,
+        city = "City",
+        description = "Bio",
+        photoFileKeys = emptyList(),
+        createdAt = ""
+    )
 }

@@ -96,7 +96,8 @@ fun ChatListScreen(
                 title = {
                     Text(
                         text = "Чаты",
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.testTag("chat_list_title")
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -111,7 +112,9 @@ fun ChatListScreen(
             isRefreshing = state.isRefreshing,
             onRefresh = { onEvent(ChatListEvent.Refresh) },
             state = pullRefreshState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues)
+                .testTag("pull_to_refresh_box"),
         ) {
             // Content
             if (state.isLoading && state.chats.isEmpty()) {
@@ -122,6 +125,17 @@ fun ChatListScreen(
                     CircularProgressIndicator(
                         color = colorScheme.primary,
                         modifier = Modifier.testTag("chat_list_progress")
+                    )
+                }
+            } else if (state.chats.isEmpty() && state.error == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Нет активных чатов",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.testTag("chat_list_empty_message")
                     )
                 }
             } else {
@@ -183,7 +197,8 @@ private fun ChatListItem(
                     contentDescription = "Avatar of ${chat.name}",
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .testTag("chat_avatar_${chat.id}"),
                     placeholder = messageIconPainter,
                     error = messageIconPainter
                 )
@@ -192,7 +207,8 @@ private fun ChatListItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(colorScheme.primaryContainer),
+                        .background(colorScheme.primaryContainer)
+                        .testTag("chat_placeholder_${chat.id}"),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -220,7 +236,8 @@ private fun ChatListItem(
                         style = MaterialTheme.typography.titleMedium,
                         color = colorScheme.onSurface,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("chat_name_${chat.id}")
                     )
                     Text(
                         text = formatTime(chat.timestamp),
@@ -242,7 +259,9 @@ private fun ChatListItem(
                         color = colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("chat_last_message_${chat.id}")
                     )
 
                     if (chat.unreadCount > 0) {
@@ -257,7 +276,9 @@ private fun ChatListItem(
                             Text(
                                 text = chat.unreadCount.toString(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onPrimary
+                                color = colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .testTag("chat_unread_count_${chat.id}")
                             )
                         }
                     }
@@ -273,7 +294,8 @@ private fun ErrorCard(message: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .testTag("chat_list_error_card"),
         colors = CardDefaults.cardColors(containerColor = colorScheme.errorContainer),
         shape = MaterialTheme.shapes.medium
     ) {
@@ -290,7 +312,8 @@ private fun ErrorCard(message: String) {
             Text(
                 text = message,
                 color = colorScheme.onErrorContainer,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.testTag("chat_list_error_text")
             )
         }
     }
