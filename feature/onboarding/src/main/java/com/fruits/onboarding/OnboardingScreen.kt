@@ -138,11 +138,6 @@ private fun OnboardingScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            state.error?.let { error ->
-                ErrorCard(error = error)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
             DescriptionSection(
                 value = state.description,
                 onValueChange = { onEvent(OnboardingEvent.OnDescriptionChanged(it)) }
@@ -159,13 +154,18 @@ private fun OnboardingScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            state.error?.let { error ->
+                ErrorCard(error = error)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             SubmitButton(
                 isLoading = state.isLoading,
                 isEnabled = state.isFormValid && !state.isLoading,
                 onClick = { onEvent(OnboardingEvent.SubmitForm) }
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
