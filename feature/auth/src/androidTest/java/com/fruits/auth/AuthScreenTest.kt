@@ -65,6 +65,9 @@ class AuthScreenTest {
         // Then
         composeTestRule.onNodeWithTag("login_progress").assertIsDisplayed()
         composeTestRule.onNodeWithTag("login_button").assertIsNotEnabled()
+        // Corner Case: Fields should be disabled during loading
+        composeTestRule.onNodeWithTag("email_field").assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("password_field").assertIsNotEnabled()
     }
 
     @Test
@@ -213,6 +216,35 @@ class AuthScreenTest {
 
         // Then
         assertThat(fakeViewModel.loginClicked).isFalse()
+    }
+
+    @Test
+    fun longErrorMessage_isDisplayedCorrectly() {
+        // Corner Case: Very long error message
+        val longError = "A very long error message that might potentially break the UI layout if not handled correctly by the Compose components. Let's see how it behaves."
+        val state = AuthState(errorMessage = longError)
+
+        composeTestRule.setContent {
+            AuthScreen(state = state, onEvent = {})
+        }
+
+        composeTestRule.onNodeWithTag("error_message")
+            .assertIsDisplayed()
+            .assertTextContains(longError)
+    }
+
+    @Test
+    fun emailField_whenDisabled_cannotBeInteractedWith() {
+        // Corner Case: Interacting with fields when loading
+        val state = AuthState(isLoading = true)
+
+        composeTestRule.setContent {
+            AuthScreen(state = state, onEvent = fakeViewModel::onEvent)
+        }
+
+        composeTestRule.onNodeWithTag("email_field").assertIsNotEnabled()
+        // Note: performTextInput might still "work" in some test environments even if enabled=false, 
+        // but assertIsNotEnabled is the correct check for UI state.
     }
 }
 

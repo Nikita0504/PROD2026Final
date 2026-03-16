@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -96,7 +97,7 @@ fun TapeRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TapeScreen(
+fun TapeScreen(
     state: TapeState,
     onEvent: (TapeEvent) -> Unit,
     reasonSheet: List<String>?,
@@ -133,7 +134,8 @@ private fun TapeScreen(
                 selectedTab = state.selectedTab,
                 onTabSelected = { onEvent(TapeEvent.OnTabSelected(it)) },
                 modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .testTag("tape_tab_switcher"),
             )
 
             Box(
@@ -146,7 +148,7 @@ private fun TapeScreen(
                 when (state.selectedTab) {
                     TapeTab.Liked -> {
                         Box(
-                            modifier = Modifier.size(cardWidth, cardHeight),
+                            modifier = Modifier.size(cardWidth, cardHeight).testTag("liked_container"),
                             contentAlignment = Alignment.Center,
                         ) {
                             when {
@@ -155,7 +157,7 @@ private fun TapeScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center,
                                     ) {
-                                        CircularProgressIndicator()
+                                        CircularProgressIndicator(modifier = Modifier.testTag("liked_progress"))
                                     }
                                 }
                                 state.likedError != null -> {
@@ -166,9 +168,12 @@ private fun TapeScreen(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        TapeErrorTitle()
+                                        TapeErrorTitle(Modifier.testTag("liked_error_title"))
                                         Spacer(Modifier.height(12.dp))
-                                        TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnLikedRetry) })
+                                        TapeRetryButton(
+                                            onRetryClick = { onEvent(TapeEvent.OnLikedRetry) },
+                                            modifier = Modifier.testTag("liked_retry_button")
+                                        )
                                     }
                                 }
                                 state.likedIsEmpty -> {
@@ -179,14 +184,14 @@ private fun TapeScreen(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        TapeLikedEmptyTitle()
+                                        TapeLikedEmptyTitle(Modifier.testTag("liked_empty_title"))
                                         Spacer(Modifier.height(8.dp))
-                                        TapeLikedEmptySubtitle()
+                                        TapeLikedEmptySubtitle(Modifier.testTag("liked_empty_subtitle"))
                                     }
                                 }
                                 state.likedCurrentCard != null -> {
                                     SwipeCard(
-                                        modifier = Modifier.fillMaxSize(),
+                                        modifier = Modifier.fillMaxSize().testTag("liked_swipe_card"),
                                         state = likedCardState,
                                         onSwiped = { direction ->
                                             coroutineScope.launch {
@@ -221,7 +226,7 @@ private fun TapeScreen(
                     }
                     TapeTab.Recommendations -> {
                         Box(
-                            modifier = Modifier.size(cardWidth, cardHeight),
+                            modifier = Modifier.size(cardWidth, cardHeight).testTag("recommendations_container"),
                             contentAlignment = Alignment.Center,
                         ) {
                             when {
@@ -230,7 +235,7 @@ private fun TapeScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center,
                                     ) {
-                                        CircularProgressIndicator()
+                                        CircularProgressIndicator(modifier = Modifier.testTag("recommendations_progress"))
                                     }
                                 }
                                 state.error != null -> {
@@ -241,9 +246,12 @@ private fun TapeScreen(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        TapeErrorTitle()
+                                        TapeErrorTitle(Modifier.testTag("recommendations_error_title"))
                                         Spacer(Modifier.height(12.dp))
-                                        TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
+                                        TapeRetryButton(
+                                            onRetryClick = { onEvent(TapeEvent.OnRetry) },
+                                            modifier = Modifier.testTag("recommendations_retry_button")
+                                        )
                                     }
                                 }
                                 state.isEmpty -> {
@@ -254,16 +262,19 @@ private fun TapeScreen(
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        TapeEmptyTitle()
+                                        TapeEmptyTitle(Modifier.testTag("recommendations_empty_title"))
                                         Spacer(Modifier.height(8.dp))
-                                        TapeEmptySubtitle()
+                                        TapeEmptySubtitle(Modifier.testTag("recommendations_empty_subtitle"))
                                         Spacer(Modifier.height(16.dp))
-                                        TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnRetry) })
+                                        TapeRetryButton(
+                                            onRetryClick = { onEvent(TapeEvent.OnRetry) },
+                                            modifier = Modifier.testTag("recommendations_retry_button_empty")
+                                        )
                                     }
                                 }
                                 state.currentCard != null -> {
                                     SwipeCard(
-                                        modifier = Modifier.fillMaxSize(),
+                                        modifier = Modifier.fillMaxSize().testTag("recommendations_swipe_card"),
                                         state = cardState,
                                         onSwiped = { direction ->
                                             coroutineScope.launch {
@@ -309,6 +320,7 @@ private fun TapeScreen(
             onDismissRequest = onDismissReasonSheet,
             sheetState = sheetState,
             dragHandle = null,
+            modifier = Modifier.testTag("reason_bottom_sheet")
         ) {
             Column(
                 modifier = Modifier
@@ -323,6 +335,7 @@ private fun TapeScreen(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.testTag("reason_sheet_title")
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 if (reasonSheet.isEmpty()) {
@@ -332,7 +345,7 @@ private fun TapeScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
-                    reasonSheet.forEach { reason ->
+                    reasonSheet.forEachIndexed { index, reason ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
                                 text = "•",
@@ -343,7 +356,7 @@ private fun TapeScreen(
                                 text = reason,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).testTag("reason_item_$index"),
                             )
                         }
                     }
@@ -358,6 +371,7 @@ private fun TapeScreen(
             onDismissRequest = onDismissAboutSheet,
             sheetState = sheetState,
             dragHandle = null,
+            modifier = Modifier.testTag("about_bottom_sheet")
         ) {
             Column(
                 modifier = Modifier
@@ -370,6 +384,7 @@ private fun TapeScreen(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.testTag("about_sheet_title")
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -378,7 +393,8 @@ private fun TapeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
+                        .verticalScroll(rememberScrollState())
+                        .testTag("about_sheet_content"),
                 )
             }
         }
@@ -431,17 +447,9 @@ private fun TapeTabSwitcher(
             ) {
                 tabs.forEach { tab ->
                     val isSelected = tab == selectedTab
-                    val (label, selectedIcon, unselectedIcon) = when (tab) {
-                        TapeTab.Recommendations -> Triple(
-                            "Рекомендации",
-                            Icons.Filled.Favorite,
-                            Icons.Outlined.FavoriteBorder,
-                        )
-                        TapeTab.Liked -> Triple(
-                            "Лайкнутые",
-                            Icons.Filled.Favorite,
-                            Icons.Outlined.FavoriteBorder,
-                        )
+                    val label = when (tab) {
+                        TapeTab.Recommendations -> "Рекомендации"
+                        TapeTab.Liked -> "Лайкнутые"
                     }
                     Row(
                         modifier = Modifier
@@ -451,7 +459,8 @@ private fun TapeTabSwitcher(
                                 selected = isSelected,
                                 onClick = { onTabSelected(tab) },
                                 role = Role.Tab,
-                            ),
+                            )
+                            .testTag("tab_${tab.name.lowercase()}"),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -505,11 +514,13 @@ private fun TapeCardOverlay(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
+                    modifier = Modifier.testTag("card_user_name")
                 )
                 Text(
                     text = city,
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.80f),
+                    modifier = Modifier.testTag("card_user_city")
                 )
             }
             Row(
@@ -522,7 +533,8 @@ private fun TapeCardOverlay(
                     enabled = isActionsEnabled,
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
+                        .height(48.dp)
+                        .testTag("btn_about"),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White.copy(alpha = 0.06f),
@@ -550,7 +562,8 @@ private fun TapeCardOverlay(
                         enabled = isActionsEnabled,
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp),
+                            .height(48.dp)
+                            .testTag("btn_why"),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White.copy(alpha = 0.06f),
@@ -579,55 +592,61 @@ private fun TapeCardOverlay(
 }
 
 @Composable
-private fun TapeErrorTitle() {
+private fun TapeErrorTitle(modifier: Modifier = Modifier) {
     Text(
         text = "Не удалось загрузить",
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onErrorContainer,
+        modifier = modifier
     )
 }
 
 @Composable
-private fun TapeEmptyTitle() {
+private fun TapeEmptyTitle(modifier: Modifier = Modifier) {
     Text(
         text = "Лента пуста",
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
     )
 }
 
 @Composable
-private fun TapeEmptySubtitle() {
+private fun TapeEmptySubtitle(modifier: Modifier = Modifier) {
     Text(
         text = "Новые рекомендации появятся позже",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
     )
 }
 
 @Composable
-private fun TapeLikedEmptyTitle() {
+private fun TapeLikedEmptyTitle(modifier: Modifier = Modifier) {
     Text(
         text = "Лайкнутых пока нет",
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
     )
 }
 
 @Composable
-private fun TapeLikedEmptySubtitle() {
+private fun TapeLikedEmptySubtitle(modifier: Modifier = Modifier) {
     Text(
         text = "Здесь появятся анкеты, которые вы лайкнули",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
     )
 }
 
 @Composable
 private fun TapeRetryButton(
     onRetryClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    OutlinedButton(onClick = onRetryClick, shape = RoundedCornerShape(999.dp)) {
+    OutlinedButton(onClick = onRetryClick, shape = RoundedCornerShape(999.dp), modifier = modifier) {
         Text("Обновить")
     }
 }

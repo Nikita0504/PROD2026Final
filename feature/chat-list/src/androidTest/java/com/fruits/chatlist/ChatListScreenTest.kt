@@ -1,13 +1,11 @@
 package com.fruits.chatlist
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.fruits.domain.model.chat.Chat
-import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,252 +14,79 @@ class ChatListScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var fakeViewModel: FakeChatListViewModel
-
-    @Before
-    fun setup() {
-        fakeViewModel = FakeChatListViewModel()
-    }
-
     @Test
-    fun renderChatListState_loading_showsProgressBar() {
-        // Given
-        val loadingState = ChatListState(
-            isLoading = true,
-            chats = emptyList()
-        )
+    fun loadingState_showsProgress() {
+        val state = ChatListState(isLoading = true, chats = emptyList())
 
-        // When
         composeTestRule.setContent {
-            ChatListScreen(
-                state = loadingState,
-                onEvent = fakeViewModel::onEvent
-            )
+            ChatListScreen(state = state, onEvent = {})
         }
 
-        // Then
         composeTestRule.onNodeWithTag("chat_list_progress").assertIsDisplayed()
     }
 
     @Test
-    fun renderChatListState_withChats_showsChatList() {
-        // Given
-        val chats = listOf(
-            Chat(
-                id = "1",
-                name = "Поддержка",
-                lastMessage = "Здравствуйте! Чем можем помочь?",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 1,
-                avatarUrl = null
-            ),
-            Chat(
-                id = "2",
-                name = "Команда проекта",
-                lastMessage = "Ревью готово",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 0,
-                avatarUrl = null
-            )
-        )
-        val successState = ChatListState(
-            isLoading = false,
-            chats = chats
-        )
+    fun emptyState_showsMessage() {
+        val state = ChatListState(isLoading = false, chats = emptyList())
 
-        // When
         composeTestRule.setContent {
-            ChatListScreen(
-                state = successState,
-                onEvent = fakeViewModel::onEvent
-            )
+            ChatListScreen(state = state, onEvent = {})
         }
 
-        // Then
-        composeTestRule.onNodeWithTag("chat_list").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Поддержка").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Команда проекта").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("chat_list_empty_message")
+            .assertIsDisplayed()
+            .assertTextContains("Нет активных чатов")
     }
 
     @Test
-    fun renderChatListState_withError_showsErrorMessage() {
-        // Given
-        val errorState = ChatListState(
-            isLoading = false,
-            chats = emptyList(),
-            error = "Ошибка загрузки чатов"
-        )
+    fun errorState_showsErrorCard() {
+        val state = ChatListState(error = "Connection failed", chats = emptyList())
 
-        // When
         composeTestRule.setContent {
-            ChatListScreen(
-                state = errorState,
-                onEvent = fakeViewModel::onEvent
-            )
+            ChatListScreen(state = state, onEvent = {})
         }
 
-        // Then
-        composeTestRule.onNodeWithText("Ошибка загрузки чатов").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("chat_list_error_card").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("chat_list_error_text").assertTextContains("Connection failed")
     }
 
     @Test
-    fun renderChatListState_emptyList_showsEmptyList() {
-        // Given
-        val emptyState = ChatListState(
-            isLoading = false,
-            chats = emptyList()
+    fun hasChats_showsChatItemsWithCorrectData() {
+        val chat = Chat(
+            id = "chat_1",
+            name = "Alice",
+            lastMessage = "Hey there!",
+            timestamp = System.currentTimeMillis(),
+            unreadCount = 5,
+            avatarUrl = null
         )
+        val state = ChatListState(chats = listOf(chat))
 
-        // When
         composeTestRule.setContent {
-            ChatListScreen(
-                state = emptyState,
-                onEvent = fakeViewModel::onEvent
-            )
+            ChatListScreen(state = state, onEvent = {})
         }
 
-        // Then
-        composeTestRule.onNodeWithTag("chat_list").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("chat_item_chat_1").assertIsDisplayed()
+        // Use useUnmergedTree = true because semantics are merged into the clickable parent Card
+        composeTestRule.onNodeWithTag("chat_name_chat_1", useUnmergedTree = true).assertTextContains("Alice")
+        composeTestRule.onNodeWithTag("chat_last_message_chat_1", useUnmergedTree = true).assertTextContains("Hey there!")
+        composeTestRule.onNodeWithTag("chat_unread_count_chat_1", useUnmergedTree = true).assertTextContains("5")
+        composeTestRule.onNodeWithTag("chat_placeholder_chat_1", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test
-    fun clickChatItem_emitsChatClickedEvent() {
-        // Given
-        val chats = listOf(
-            Chat(
-                id = "chat_123",
-                name = "Test Chat",
-                lastMessage = "Last message",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 0,
-                avatarUrl = null
-            )
-        )
-        val successState = ChatListState(
-            isLoading = false,
-            chats = chats
-        )
+    fun clickChatItem_emitsEvent() {
+        val chat = Chat(id = "1", name = "Test", lastMessage = "", timestamp = 0, unreadCount = 0, avatarUrl = null)
+        val state = ChatListState(chats = listOf(chat))
+        var clickedChatId: String? = null
 
-        // When
         composeTestRule.setContent {
-            ChatListScreen(
-                state = successState,
-                onEvent = fakeViewModel::onEvent
-            )
+            ChatListScreen(state = state, onEvent = { event ->
+                if (event is ChatListEvent.ChatClicked) clickedChatId = event.chatId
+            })
         }
 
-        composeTestRule.onNodeWithTag("chat_item_chat_123").performClick()
-
-        // Then
-        assertThat(fakeViewModel.clickedChatId).isEqualTo("chat_123")
-    }
-
-    @Test
-    fun renderChatListState_withUnreadCount_showsBadge() {
-        // Given
-        val chats = listOf(
-            Chat(
-                id = "1",
-                name = "Chat with unread",
-                lastMessage = "New message",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 5,
-                avatarUrl = null
-            )
-        )
-        val successState = ChatListState(
-            isLoading = false,
-            chats = chats
-        )
-
-        // When
-        composeTestRule.setContent {
-            ChatListScreen(
-                state = successState,
-                onEvent = fakeViewModel::onEvent
-            )
-        }
-
-        // Then
-        composeTestRule.onNodeWithText("5").assertIsDisplayed()
-    }
-
-    @Test
-    fun renderChatListState_refreshing_showsRefreshIndicator() {
-        // Given
-        val chats = listOf(
-            Chat(
-                id = "1",
-                name = "Chat",
-                lastMessage = "Message",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 0,
-                avatarUrl = null
-            )
-        )
-        val refreshingState = ChatListState(
-            isLoading = false,
-            isRefreshing = true,
-            chats = chats
-        )
-
-        // When
-        composeTestRule.setContent {
-            ChatListScreen(
-                state = refreshingState,
-                onEvent = fakeViewModel::onEvent
-            )
-        }
-
-        // Then - refresh indicator should be shown (implicit in PullToRefreshBox)
-        composeTestRule.onNodeWithTag("chat_list").assertIsDisplayed()
-    }
-
-    @Test
-    fun pullToRefresh_emitsRefreshEvent() {
-        // Given
-        val chats = listOf(
-            Chat(
-                id = "1",
-                name = "Chat",
-                lastMessage = "Message",
-                timestamp = System.currentTimeMillis(),
-                unreadCount = 0,
-                avatarUrl = null
-            )
-        )
-        val successState = ChatListState(
-            isLoading = false,
-            chats = chats
-        )
-
-        // When
-        composeTestRule.setContent {
-            ChatListScreen(
-                state = successState,
-                onEvent = fakeViewModel::onEvent
-            )
-        }
-
-        // Note: Pull-to-refresh gesture testing requires more complex setup
-        // This test verifies the structure is in place
-        composeTestRule.onNodeWithTag("chat_list").assertIsDisplayed()
-    }
-}
-
-// Fake ViewModel для тестирования
-class FakeChatListViewModel {
-    var clickedChatId: String? = null
-    var refreshCalled: Boolean = false
-
-    fun onEvent(event: ChatListEvent) {
-        when (event) {
-            is ChatListEvent.ChatClicked -> {
-                clickedChatId = event.chatId
-            }
-            ChatListEvent.Refresh -> {
-                refreshCalled = true
-            }
-        }
+        composeTestRule.onNodeWithTag("chat_item_1").performClick()
+        assert(clickedChatId == "1")
     }
 }
