@@ -20,9 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -305,7 +305,7 @@ private fun AddImageButton(
     Surface(
         onClick = onClick,
         modifier = Modifier
-            .width(if (isEmpty) 200.dp else 120.dp)
+            .fillMaxSize()
             .aspectRatio(1f),
         shape = RoundedCornerShape(16.dp),
         color = colorScheme.primaryContainer.copy(alpha = 0.5f),
@@ -400,7 +400,7 @@ internal fun ImageItem(
 ) {
     Box(
         modifier = Modifier
-            .width(120.dp)
+            .fillMaxSize()
             .aspectRatio(1f)
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -463,4 +463,3 @@ internal fun ImageItem(
         }
     }
 }
-

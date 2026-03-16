@@ -1,6 +1,5 @@
 package com.fruits.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +41,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import com.fruits.domain.model.user.User
+import com.fruits.logger.Log
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -66,6 +65,7 @@ fun ProfileRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            Log.d("ProfileViewModel", "Refresh profile")
             viewModel.onEvent(ProfileEvent.Refresh)
         }
     }
@@ -103,11 +103,6 @@ fun ProfileScreen(
             )
         },
     ) { padding ->
-        if (state.isLoading && state.user == null) {
-            LoadingState(modifier = Modifier.padding(padding))
-            return@Scaffold
-        }
-
         if (state.error != null && state.user == null) {
             ErrorState(
                 error = state.error,
@@ -118,11 +113,22 @@ fun ProfileScreen(
         }
 
         if (state.user == null) {
-            EmptyState(modifier = Modifier.padding(padding))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
             return@Scaffold
         }
 
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -135,7 +141,6 @@ fun ProfileScreen(
                 ProfileHeaderCard(
                     user = state.user,
                     avatarUrl = state.avatarUrl,
-                    isRefreshing = state.isRefreshing,
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -154,6 +159,7 @@ fun ProfileScreen(
                         containerColor = colorScheme.primary,
                         contentColor = colorScheme.onPrimary,
                     ),
+                    enabled = true,
                 ) {
                     Text(
                         text = "Редактировать профиль",
@@ -163,10 +169,27 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LogoutButton(onClick = { onEvent(ProfileEvent.Logout) })
+                LogoutButton(
+                    onClick = { onEvent(ProfileEvent.Logout) },
+                    enabled = true,
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+
+//            if (state.isRefreshing) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(top = 8.dp),
+//                    contentAlignment = Alignment.TopCenter
+//                ) {
+//                    CircularProgressIndicator(
+//                        modifier = Modifier.size(24.dp),
+//                        strokeWidth = 2.dp,
+//                    )
+//                }
+//            }
         }
     }
 }
@@ -175,7 +198,6 @@ fun ProfileScreen(
 private fun ProfileHeaderCard(
     user: User,
     avatarUrl: String?,
-    isRefreshing: Boolean,
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -218,22 +240,6 @@ private fun ProfileHeaderCard(
                                 tint = colorScheme.onPrimaryContainer,
                             )
                         }
-                    }
-                }
-                if (isRefreshing) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(colorScheme.surface),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = colorScheme.primary,
-                        )
                     }
                 }
             }
@@ -306,30 +312,28 @@ private fun ProfileInfoCard(user: User) {
                 }
             }
 
-            user.description?.takeIf { it.isNotBlank() }?.let { description ->
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(
-                        Icons.Default.PersonOutline,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = colorScheme.primary,
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(
+                    Icons.Default.PersonOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "О себе",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colorScheme.onSurfaceVariant,
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "О себе",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colorScheme.onSurface,
-                        )
-                    }
+                    Text(
+                        text = user.description!!,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colorScheme.onSurface,
+                    )
                 }
             }
 
@@ -340,30 +344,6 @@ private fun ProfileInfoCard(user: User) {
                     color = colorScheme.onSurfaceVariant,
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun LoadingState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Загрузка профиля...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
     }
 }
@@ -416,30 +396,7 @@ private fun ErrorState(
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                Icons.Default.PersonOutline,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(64.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Данные профиля не найдены",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun LogoutButton(onClick: () -> Unit) {
+private fun LogoutButton(onClick: () -> Unit, enabled: Boolean = true) {
     val colorScheme = MaterialTheme.colorScheme
     OutlinedButton(
         onClick = onClick,
@@ -449,7 +406,8 @@ private fun LogoutButton(onClick: () -> Unit) {
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = colorScheme.error
-        )
+        ),
+        enabled = enabled,
     ) {
         Icon(
             Icons.Default.Logout,
