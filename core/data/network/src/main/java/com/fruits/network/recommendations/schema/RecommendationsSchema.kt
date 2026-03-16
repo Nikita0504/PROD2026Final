@@ -18,5 +18,6 @@ data class RecommendationsSchema(
     val city: String,
     @SerialName("photo_file_keys") val photoFileKeys: List<String>,
     val description: String,
-    val explanation: List<String>
+    val explanation: List<String>,
+    val tags: List<String> = emptyList(),
 )

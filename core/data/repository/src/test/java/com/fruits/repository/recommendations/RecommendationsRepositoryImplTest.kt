@@ -105,7 +105,8 @@ class RecommendationsRepositoryImplTest {
                 city = "Mock City",
                 photoFileKeys = listOf("mock_photo"),
                 description = "Mock description",
-                explanation = listOf("Mock explanation")
+                explanation = listOf("Mock explanation"),
+                tags = emptyList(),
             )
         )
 

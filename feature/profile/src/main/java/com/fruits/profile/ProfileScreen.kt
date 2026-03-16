@@ -1,6 +1,5 @@
 package com.fruits.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
@@ -103,11 +100,6 @@ fun ProfileScreen(
             )
         },
     ) { padding ->
-        if (state.isLoading && state.user == null) {
-            LoadingState(modifier = Modifier.padding(padding))
-            return@Scaffold
-        }
-
         if (state.error != null && state.user == null) {
             ErrorState(
                 error = state.error,
@@ -135,7 +127,6 @@ fun ProfileScreen(
                 ProfileHeaderCard(
                     user = state.user,
                     avatarUrl = state.avatarUrl,
-                    isRefreshing = state.isRefreshing,
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -175,7 +166,6 @@ fun ProfileScreen(
 private fun ProfileHeaderCard(
     user: User,
     avatarUrl: String?,
-    isRefreshing: Boolean,
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -191,48 +181,30 @@ private fun ProfileHeaderCard(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box {
-                Surface(
-                    modifier = Modifier.size(120.dp),
-                    shape = CircleShape,
-                    color = colorScheme.primaryContainer,
-                    tonalElevation = 4.dp,
-                ) {
-                    if (avatarUrl != null) {
-                        AsyncImage(
-                            model = avatarUrl,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            onError = { },
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(56.dp),
-                                tint = colorScheme.onPrimaryContainer,
-                            )
-                        }
-                    }
-                }
-                if (isRefreshing) {
+            Surface(
+                modifier = Modifier.size(120.dp),
+                shape = CircleShape,
+                color = colorScheme.primaryContainer,
+                tonalElevation = 4.dp,
+            ) {
+                if (avatarUrl != null) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        onError = { },
+                    )
+                } else {
                     Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(colorScheme.surface),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = colorScheme.primary,
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(56.dp),
+                            tint = colorScheme.onPrimaryContainer,
                         )
                     }
                 }
@@ -344,29 +316,6 @@ private fun ProfileInfoCard(user: User) {
     }
 }
 
-@Composable
-private fun LoadingState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Загрузка профиля...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
 
 @Composable
 private fun ErrorState(

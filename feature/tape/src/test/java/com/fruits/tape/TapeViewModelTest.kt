@@ -213,7 +213,7 @@ class TapeViewModelTest {
         coVerify(exactly = 0) { sendUserActionUseCase(any(), any()) }
     }
 
-    private fun createRecommendation(id: String, reasons: List<String> = emptyList()) = Recommendations(
+    private fun createRecommendation(id: String, reasons: List<String> = emptyList(), tags: List<String> = emptyList()) = Recommendations(
         userId = id,
         firstName = "Name$id",
         secondName = "Surname",
@@ -221,7 +221,8 @@ class TapeViewModelTest {
         city = "City",
         photoFileKeys = emptyList(),
         description = "Bio",
-        explanation = reasons
+        explanation = reasons,
+        tags = tags,
     )
 
     private fun createIncomingLike(id: String) = IncomingLike(

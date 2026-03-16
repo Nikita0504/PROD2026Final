@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -214,6 +215,7 @@ fun TapeScreen(
                                                 name = state.likedCurrentCard.name,
                                                 age = state.likedCurrentCard.age,
                                                 city = state.likedCurrentCard.city,
+                                                tags = state.likedCurrentCard.tags,
                                                 isActionsEnabled = !state.likedIsLoading,
                                                 onAboutClick = { onEvent(TapeEvent.OnLikedAboutClicked) },
                                                 showWhyButton = false,
@@ -297,6 +299,7 @@ fun TapeScreen(
                                                 name = state.currentCard.name,
                                                 age = state.currentCard.age,
                                                 city = state.currentCard.city,
+                                                tags = state.currentCard.tags,
                                                 isActionsEnabled = !state.isLoading,
                                                 onAboutClick = { onEvent(TapeEvent.OnAboutClicked) },
                                                 onWhyClick = { onEvent(TapeEvent.OnWhyClicked) },
@@ -486,6 +489,7 @@ private fun TapeCardOverlay(
     name: String,
     age: Int,
     city: String,
+    tags: List<String>,
     isActionsEnabled: Boolean,
     onAboutClick: () -> Unit,
     onWhyClick: () -> Unit = {},
@@ -522,6 +526,29 @@ private fun TapeCardOverlay(
                     color = Color.White.copy(alpha = 0.80f),
                     modifier = Modifier.testTag("card_user_city")
                 )
+            }
+            if (tags.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    tags.forEach { tag ->
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = Color.White.copy(alpha = 0.18f),
+                            tonalElevation = 0.dp,
+                        ) {
+                            Text(
+                                text = tag,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.95f),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            )
+                        }
+                    }
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
