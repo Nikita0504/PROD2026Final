@@ -9,8 +9,9 @@ val profileModule = module {
         ProfileViewModel(
             getProfileUseCase = get(),
             sessionManager = get(),
-            imageUploadUrlRepository = get(),
             userLocalRepository = get(),
+            batchDownloadImagesUseCase = get(),
+            application = get()
         )
     }
 }

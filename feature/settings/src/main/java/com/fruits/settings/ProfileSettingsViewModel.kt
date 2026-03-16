@@ -8,6 +8,7 @@ import com.fruits.domain.usecase.auth.GetProfileUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
 import com.fruits.domain.usecase.image.BatchDownloadImagesUseCase
 import com.fruits.domain.usecase.image.UploadImageUseCase
+import com.fruits.logger.Log
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ class ProfileSettingsViewModel(
     private val _state = MutableStateFlow(
         ProfileSettingsState(
             isLoading = true,
+            isImagesLoading = true,
             error = null,
         )
     )
@@ -57,7 +59,6 @@ class ProfileSettingsViewModel(
                     validateForm()
                 }
             }
-
             is ProfileSettingsEvent.SaveChanges -> saveProfile()
             is ProfileSettingsEvent.DismissError -> _state.update { it.copy(error = null) }
             is ProfileSettingsEvent.PickImage -> startUpload(event.uri)
@@ -67,50 +68,74 @@ class ProfileSettingsViewModel(
     }
 
     private fun hasChanges(state: ProfileSettingsState, newDescription: String): Boolean {
-        val descriptionChanged = newDescription != (state.user?.description ?: "")
-        val imagesChanged = state.pendingImages.isNotEmpty() ||
-                state.displayedImages.size != state.serverPhotoKeys.size
+        val initialDescription = state.user?.description ?: ""
+        val descriptionChanged = newDescription != initialDescription
+
+        // Проверяем изменения в картинках:
+        // 1. Есть новые (не серверные)
+        // 2. Есть удаленные (помеченные флагом)
+        // 3. Количество активных картинок отличается от исходного
+        val activeImages = state.images.filter { !it.isDeleted }
+        val newImagesCount = activeImages.count { !it.isServerImage && it.errorMessage == null }
+        val deletedServerImagesCount = state.images.count { it.isServerImage && it.isDeleted }
+
+        val imagesChanged = newImagesCount > 0 || deletedServerImagesCount > 0
+
         return descriptionChanged || imagesChanged
     }
 
     private fun validateForm() {
         val currentState = _state.value
-        val totalImages = currentState.displayedImages.size + currentState.pendingImages.size
+        val activeImages = currentState.images.filter { !it.isDeleted && it.errorMessage == null }
+        val totalImages = activeImages.size
+
+        // Валидация:
+        // 1. Кол-во фото в диапазоне
+        // 2. Описание не пустое
+        // 3. Нет ошибок загрузки/аплоада
+        // 4. Нет процессов загрузки прямо сейчас
         val hasValidImages = totalImages in MIN_IMAGES..MAX_IMAGES
         val hasValidDescription = currentState.editedDescription.isNotBlank() &&
                 currentState.editedDescription.length <= MAX_DESCRIPTION_LENGTH
-        val noErrorsUploading = currentState.pendingImages.none { it.errorMessage != null }
-        val noUploadingInProgress = currentState.pendingImages.none { it.isLoading }
+        val noErrors = activeImages.none { it.errorMessage != null }
+        val noLoading = activeImages.none { it.isLoading }
 
-        val isValid = hasValidImages && hasValidDescription && noErrorsUploading && noUploadingInProgress
+        val isValid = hasValidImages && hasValidDescription && noErrors && noLoading
 
         _state.update { it.copy(isFormValid = isValid) }
     }
 
     private fun loadProfile() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, isImagesLoading = true, error = null) }
 
             try {
                 getProfileUseCase().collect { result ->
                     result.onSuccess { user ->
+                        // 1. Обновляем данные юзера
                         _state.update {
                             it.copy(
                                 user = user,
                                 editedDescription = user.description ?: "",
-                                serverPhotoKeys = user.photoFileKeys,
                                 isLoading = false,
-                                error = null,
-                                hasChanges = false
+                                error = null
+                                // Картинки пока старые или пустые, ждем загрузки
                             )
                         }
 
+                        // 2. Запускаем загрузку картинок
                         if (user.photoFileKeys.isNotEmpty()) {
                             downloadServerImages(user.photoFileKeys)
                         } else {
-                            _state.update { it.copy(displayedImages = emptyList()) }
+                            // Если фото нет, сразу снимаем флаг загрузки картинок
+                            _state.update {
+                                it.copy(
+                                    images = emptyList(),
+                                    isImagesLoading = false
+                                )
+                            }
+                            validateForm()
                         }
-                        validateForm()
                     }
 
                     result.onFailure { e ->
@@ -118,6 +143,7 @@ class ProfileSettingsViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
+                                isImagesLoading = false,
                                 error = errorMsg,
                                 user = null
                             )
@@ -129,6 +155,7 @@ class ProfileSettingsViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
+                        isImagesLoading = false,
                         error = e.message ?: "Неизвестная ошибка"
                     )
                 }
@@ -139,62 +166,106 @@ class ProfileSettingsViewModel(
     private fun downloadServerImages(keys: List<String>) {
         viewModelScope.launch {
             try {
+                // Создаем заглушки сразу, чтобы UI знал сколько будет элементов (опционально)
+                // Но лучше дождаться реальных данных, чтобы не моргать скелетонами лишний раз,
+                // если загрузка быстрая.
+
                 batchDownloadImagesUseCase(keys).collect { result ->
                     result.onSuccess { batch ->
-                        val images = batch.results.mapNotNull { (key, res) ->
+                        val loadedImages = batch.results.mapNotNull { (key, res) ->
                             res.imageData?.let { bytes ->
                                 try {
                                     val uri = ImageUtils.createTempImageUri(application, bytes, key)
-                                    ProfileImage(id = key, uri = uri, isLoading = false, isPending = false)
-                                } catch (_: Exception) {
+                                    ProfileImage(
+                                        id = key,
+                                        uri = uri,
+                                        isLoading = false,
+                                        isServerImage = true,
+                                        isDeleted = false
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("ProfileSettingsVM", "Failed to create URI for $key", e)
                                     null
                                 }
                             }
                         }
-                        _state.update { it.copy(displayedImages = images, isLoading = false) }
+
+                        // Атомарное обновление всего списка картинок
+                        _state.update {
+                            it.copy(
+                                images = loadedImages,
+                                isImagesLoading = false
+                            )
+                        }
                         validateForm()
                     }
 
-                    result.onFailure {
-                        _state.update { it.copy(displayedImages = emptyList()) }
+                    result.onFailure { e ->
+                        Log.e("ProfileSettingsVM", "Batch download failed", e)
+                        // При ошибке загрузки фото мы всё равно снимаем лоадер,
+                        // но показываем пустой список или снекбар.
+                        // Пользователь сможет добавить фото заново.
+                        _state.update {
+                            it.copy(
+                                images = emptyList(),
+                                isImagesLoading = false
+                            )
+                        }
                         _effect.send(ProfileSettingsEffect.ShowErrorSnackbar("Не удалось загрузить фото"))
                         validateForm()
                     }
                 }
-            } catch (_: Exception) {
-                _state.update { it.copy(displayedImages = emptyList()) }
+            } catch (e: Exception) {
+                Log.e("ProfileSettingsVM", "Exception in downloadServerImages", e)
+                _state.update {
+                    it.copy(
+                        images = emptyList(),
+                        isImagesLoading = false
+                    )
+                }
                 validateForm()
             }
         }
     }
 
     private fun startUpload(uri: Uri) {
-        val totalImages = _state.value.displayedImages.size + _state.value.pendingImages.size
-        if (totalImages >= MAX_IMAGES) {
+        val currentState = _state.value
+        val activeImages = currentState.images.filter { !it.isDeleted && it.errorMessage == null }
+
+        if (activeImages.size >= MAX_IMAGES) {
             _effect.trySend(ProfileSettingsEffect.ShowErrorSnackbar("Максимум $MAX_IMAGES фотографий"))
             return
         }
 
-        val alreadyExists = _state.value.pendingImages.any { it.uri == uri } ||
-                _state.value.displayedImages.any { it.uri == uri }
+        // Проверка на дубликаты по URI (если пользователь выбрал тот же файл)
+        val alreadyExists = currentState.images.any { it.uri == uri && !it.isDeleted }
         if (alreadyExists) {
             return
         }
 
         val tempId = UUID.randomUUID().toString()
-        val newPending = ProfileImage(id = tempId, uri = uri, isLoading = true, isPending = true, progress = 0f)
+        val newImage = ProfileImage(
+            id = tempId,
+            uri = uri,
+            isLoading = true,
+            progress = 0f,
+            isServerImage = false,
+            isDeleted = false
+        )
 
+        // Добавляем в список сразу (оптимистичный UI)
         _state.update {
             it.copy(
-                pendingImages = it.pendingImages + newPending,
+                images = it.images + newImage,
                 hasChanges = true
             )
         }
+        validateForm()
 
         viewModelScope.launch {
             val inputStream = application.contentResolver.openInputStream(uri)
             if (inputStream == null) {
-                markUploadError(tempId, "Не удалось открыть файл")
+                markImageError(tempId, "Не удалось открыть файл")
                 validateForm()
                 return@launch
             }
@@ -202,29 +273,30 @@ class ProfileSettingsViewModel(
             try {
                 uploadImageUseCase(inputStream = inputStream).collect { result ->
                     result.onSuccess { serverKey ->
-                        val completedImage = ProfileImage(
-                            id = serverKey,
-                            uri = uri,
-                            isLoading = false,
-                            isPending = false
-                        )
+                        // Успех: обновляем ID на серверный и снимаем лоадер
                         _state.update { currentState ->
-                            currentState.copy(
-                                pendingImages = currentState.pendingImages.filter { it.id != tempId },
-                                displayedImages = currentState.displayedImages + completedImage,
-                                hasChanges = true
-                            )
+                            val updatedList = currentState.images.map { img ->
+                                if (img.id == tempId) {
+                                    img.copy(
+                                        id = serverKey, // Меняем временный ID на постоянный
+                                        isLoading = false,
+                                        progress = 1f,
+                                        isServerImage = true // Теперь это серверное фото
+                                    )
+                                } else img
+                            }
+                            currentState.copy(images = updatedList, hasChanges = true)
                         }
                         validateForm()
                     }
 
                     result.onFailure { e ->
-                        markUploadError(tempId, e.message ?: "Ошибка загрузки")
+                        markImageError(tempId, e.message ?: "Ошибка загрузки")
                         validateForm()
                     }
                 }
             } catch (e: Exception) {
-                markUploadError(tempId, e.message ?: "Неизвестная ошибка")
+                markImageError(tempId, e.message ?: "Неизвестная ошибка")
                 validateForm()
             } finally {
                 inputStream.close()
@@ -233,48 +305,47 @@ class ProfileSettingsViewModel(
     }
 
     private fun retryUpload(imageId: String) {
-        val image = _state.value.pendingImages.find { it.id == imageId }
-        if (image != null && image.uri != null) {
+        val image = _state.value.images.find { it.id == imageId }
+        if (image != null && image.uri != null && !image.isServerImage) {
             _state.update {
-                it.copy(pendingImages = it.pendingImages.filter { it.id != imageId })
+                it.copy(images = it.images.filter { it.id != imageId })
             }
             startUpload(image.uri)
         }
     }
 
-    private fun markUploadError(id: String, msg: String) {
+    private fun markImageError(id: String, msg: String) {
         _state.update { currentState ->
-            val updated = currentState.pendingImages.map { img ->
+            val updated = currentState.images.map { img ->
                 if (img.id == id) img.copy(isLoading = false, errorMessage = msg) else img
             }
-            currentState.copy(pendingImages = updated)
+            currentState.copy(images = updated)
         }
     }
 
     private fun removeImage(id: String) {
-        val isPending = _state.value.pendingImages.any { it.id == id }
-        if (isPending) {
-            _state.update {
-                it.copy(
-                    pendingImages = it.pendingImages.filter { it.id != id },
-                    hasChanges = true
-                )
-            }
-            validateForm()
-            return
-        }
+        val currentState = _state.value
+        val image = currentState.images.find { it.id == id }
+        if (image == null) return
 
-        val isServer = _state.value.displayedImages.any { it.id == id }
-        if (isServer) {
+        if (image.isServerImage) {
             _state.update {
                 it.copy(
-                    displayedImages = it.displayedImages.filter { it.id != id },
-                    serverPhotoKeys = it.serverPhotoKeys.filter { it != id },
+                    images = it.images.map {
+                        if (it.id == id) it.copy(isDeleted = true) else it
+                    },
                     hasChanges = true
                 )
             }
-            validateForm()
+        } else {
+            _state.update {
+                it.copy(
+                    images = it.images.filter { it.id != id },
+                    hasChanges = true
+                )
+            }
         }
+        validateForm()
     }
 
     private fun saveProfile() {
@@ -293,33 +364,20 @@ class ProfileSettingsViewModel(
 
         viewModelScope.launch {
             try {
-                val currentDisplayedKeys = _state.value.displayedImages.map { it.id }
-                val newUploadedKeys = _state.value.pendingImages.filter { !it.isPending }.map { it.id }
-                val finalKeys = currentDisplayedKeys + newUploadedKeys
+                // Формируем финальный список ключей:
+                // Берем все картинки, которые НЕ помечены на удаление и НЕ имеют ошибок
+                val finalKeys = _state.value.images
+                    .filter { !it.isDeleted && it.errorMessage == null }
+                    .map { it.id }
 
                 updateProfileUseCase(
                     description = _state.value.editedDescription,
                     photoFilesKeys = finalKeys
                 )
-                    .onSuccess { updatedUser ->
-                        _state.update {
-                            it.copy(
-                                user = updatedUser,
-                                serverPhotoKeys = updatedUser.photoFileKeys,
-                                pendingImages = emptyList(),
-                                displayedImages = emptyList(),
-                                hasChanges = false,
-                                isSaving = false,
-                                isLoading = true,
-                                isFormValid = false
-                            )
-                        }
-
+                    .onSuccess {
                         _effect.send(ProfileSettingsEffect.ShowSuccessSnackbar)
                         _effect.send(ProfileSettingsEffect.NavigateBack)
-                        loadProfile()
                     }
-
                     .onFailure { e ->
                         val errorMsg = e.message ?: "Не удалось сохранить"
                         _state.update { it.copy(isSaving = false, error = errorMsg) }
@@ -331,4 +389,3 @@ class ProfileSettingsViewModel(
         }
     }
 }
-

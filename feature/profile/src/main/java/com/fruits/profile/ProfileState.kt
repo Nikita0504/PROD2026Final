@@ -4,7 +4,7 @@ import com.fruits.domain.model.user.User
 
 data class ProfileState(
     val user: User? = null,
-    val avatarUrl: String? = null,
+    val avatarUri: String? = null,
     val error: String? = null,
     val isRefreshing: Boolean = false,
 )

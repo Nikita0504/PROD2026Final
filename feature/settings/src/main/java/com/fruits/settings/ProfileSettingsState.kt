@@ -6,13 +6,12 @@ import com.fruits.domain.model.user.User
 data class ProfileSettingsState(
     val user: User? = null,
     val isLoading: Boolean = false,
+    val isImagesLoading: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,
     val editedDescription: String = "",
     val hasChanges: Boolean = false,
-    val serverPhotoKeys: List<String> = emptyList(),
-    val displayedImages: List<ProfileImage> = emptyList(),
-    val pendingImages: List<ProfileImage> = emptyList(),
+    val images: List<ProfileImage> = emptyList(),
     val isFormValid: Boolean = false,
 )
 
@@ -22,7 +21,8 @@ data class ProfileImage(
     val isLoading: Boolean = false,
     val progress: Float = 0f,
     val errorMessage: String? = null,
-    val isPending: Boolean = true,
+    val isServerImage: Boolean = true,
+    val isDeleted: Boolean = false
 )
 
 sealed interface ProfileSettingsEvent {
@@ -39,4 +39,3 @@ sealed interface ProfileSettingsEffect {
     data object ShowSuccessSnackbar : ProfileSettingsEffect
     data object NavigateBack : ProfileSettingsEffect
 }
-

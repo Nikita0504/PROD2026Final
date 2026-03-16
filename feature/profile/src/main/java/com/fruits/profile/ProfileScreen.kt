@@ -140,7 +140,7 @@ fun ProfileScreen(
 
                 ProfileHeaderCard(
                     user = state.user,
-                    avatarUrl = state.avatarUrl,
+                    avatarUri = state.avatarUri, // ← Изменено на avatarUri
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -159,7 +159,6 @@ fun ProfileScreen(
                         containerColor = colorScheme.primary,
                         contentColor = colorScheme.onPrimary,
                     ),
-                    enabled = true,
                 ) {
                     Text(
                         text = "Редактировать профиль",
@@ -171,25 +170,24 @@ fun ProfileScreen(
 
                 LogoutButton(
                     onClick = { onEvent(ProfileEvent.Logout) },
-                    enabled = true,
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
-//            if (state.isRefreshing) {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(top = 8.dp),
-//                    contentAlignment = Alignment.TopCenter
-//                ) {
-//                    CircularProgressIndicator(
-//                        modifier = Modifier.size(24.dp),
-//                        strokeWidth = 2.dp,
-//                    )
-//                }
-//            }
+            if (state.isRefreshing) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                    )
+                }
+            }
         }
     }
 }
@@ -197,7 +195,7 @@ fun ProfileScreen(
 @Composable
 private fun ProfileHeaderCard(
     user: User,
-    avatarUrl: String?,
+    avatarUri: String?, // ← Изменено на avatarUri
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -220,13 +218,12 @@ private fun ProfileHeaderCard(
                     color = colorScheme.primaryContainer,
                     tonalElevation = 4.dp,
                 ) {
-                    if (avatarUrl != null) {
+                    if (avatarUri != null) {
                         AsyncImage(
-                            model = avatarUrl,
+                            model=avatarUri,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
-                            onError = { },
                         )
                     } else {
                         Box(
@@ -312,28 +309,30 @@ private fun ProfileInfoCard(user: User) {
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    Icons.Default.PersonOutline,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "О себе",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colorScheme.onSurfaceVariant,
+            user.description?.takeIf { it.isNotBlank() }?.let { description ->
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(
+                        Icons.Default.PersonOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = colorScheme.primary,
                     )
-                    Text(
-                        text = user.description!!,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colorScheme.onSurface,
-                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "О себе",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colorScheme.onSurface,
+                        )
+                    }
                 }
             }
 

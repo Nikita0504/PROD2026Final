@@ -114,14 +114,22 @@ internal fun ProfileSettingsScreen(
             )
         },
     ) { padding ->
-        if (state.isLoading) {
+        if (state.isLoading || state.isImagesLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = if (state.isLoading) "Загрузка профиля..." else "Загрузка фотографий...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             return@Scaffold
         }
@@ -137,6 +145,7 @@ internal fun ProfileSettingsScreen(
                     text = state.error,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(24.dp)
                 )
             }
             return@Scaffold
@@ -187,7 +196,8 @@ internal fun ProfileSettingsScreen(
                     PhotosSectionHeader()
                     Spacer(modifier = Modifier.height(16.dp))
                     PhotosGridSection(
-                        images = state.displayedImages + state.pendingImages,
+                        // Фильтруем удаленные картинки для отображения
+                        images = state.images.filter { !it.isDeleted },
                         onRemove = { onEvent(ProfileSettingsEvent.RemoveImage(it)) },
                         onRetry = { onEvent(ProfileSettingsEvent.RetryUpload(it)) },
                         onAddImageClick = onAddImageClick,
@@ -211,6 +221,7 @@ internal fun ProfileSettingsScreen(
         }
     }
 }
+
 
 @Composable
 internal fun DescriptionField(
@@ -264,7 +275,8 @@ internal fun PhotosGridSection(
     onRetry: (String) -> Unit,
     onAddImageClick: () -> Unit,
 ) {
-    val canAddMore = images.count { !it.isPending } < 5
+    val successfulImagesCount = images.count { it.errorMessage == null && !it.isLoading }
+    val canAddMore = successfulImagesCount < 5
 
     if (images.isEmpty()) {
         AddImageButton(
@@ -413,12 +425,18 @@ internal fun ImageItem(
                 modifier = Modifier.fillMaxSize(),
                 alpha = if (image.isLoading) 0.6f else 1f
             )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            }
         }
 
         if (image.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
-                    progress = { image.progress },
                     modifier = Modifier.size(24.dp),
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.primary

@@ -12,7 +12,6 @@ class BatchDownloadImagesUseCase(
 ) {
     private companion object {
         private const val TAG = "BatchDownloadUseCase"
-        private const val MAX_CONCURRENT_DOWNLOADS = 3
     }
 
     operator fun invoke(
