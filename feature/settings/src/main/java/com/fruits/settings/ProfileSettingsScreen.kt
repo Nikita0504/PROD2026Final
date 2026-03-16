@@ -264,27 +264,33 @@ internal fun PhotosGridSection(
     onRetry: (String) -> Unit,
     onAddImageClick: () -> Unit,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val canAddMore = images.count { !it.isPending } < 5
 
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        images.forEach { image ->
-            ImageItem(
-                image = image,
-                onRemove = { onRemove(image.id) },
-                onRetry = { onRetry(image.id) }
-            )
-        }
+    if (images.isEmpty()) {
+        AddImageButton(
+            isEmpty = true,
+            onClick = onAddImageClick,
+        )
+    } else {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            images.forEach { image ->
+                ImageItem(
+                    image = image,
+                    onRemove = { onRemove(image.id) },
+                    onRetry = { onRetry(image.id) }
+                )
+            }
 
-        if (canAddMore) {
-            AddImageButton(
-                isEmpty = images.isEmpty(),
-                onClick = onAddImageClick,
-            )
+            if (canAddMore) {
+                AddImageButton(
+                    isEmpty = false,
+                    onClick = onAddImageClick,
+                )
+            }
         }
     }
 }
