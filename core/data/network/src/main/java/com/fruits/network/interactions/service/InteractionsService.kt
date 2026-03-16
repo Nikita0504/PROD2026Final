@@ -2,6 +2,7 @@ package com.fruits.network.interactions.service
 
 import com.fruits.logger.Log
 import com.fruits.network.Const
+import com.fruits.network.interactions.schema.IncomingLikeSchema
 import com.fruits.network.interactions.schema.TargetUserIdSchema
 import com.fruits.network.interactions.schema.UserActionCreateSchema
 import com.fruits.network.interactions.schema.UserReportCreateSchema
@@ -9,6 +10,7 @@ import com.fruits.network.util.ApiResult
 import com.fruits.network.util.safeCall
 import com.fruits.network.util.toApiResult
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -80,6 +82,32 @@ class InteractionsService(
                 }
                 is ApiResult.Error -> {
                     Log.w(TAG, "Failed to send user report: target=${request.targetUserId}, reason=${request.reason}, code=${result.code}, message=${result.message}")
+                }
+            }
+
+            result
+        }
+
+    suspend fun getIncomingLikes(
+        accessToken: String,
+    ): ApiResult<List<IncomingLikeSchema>> =
+        safeCall {
+            Log.d(TAG, "Requesting incoming likes, token present: ${accessToken.isNotBlank()}")
+
+            val result: ApiResult<List<IncomingLikeSchema>> =
+                client.get("$baseUrl/interactions/incoming-likes") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }.toApiResult(
+                    401 to "Пользователь не авторизован",
+                    503 to "Сервис временно недоступен, попробуйте позже",
+                )
+
+            when (result) {
+                is ApiResult.Success -> {
+                    Log.i(TAG, "Incoming likes fetched: ${result.data.size} items")
+                }
+                is ApiResult.Error -> {
+                    Log.w(TAG, "Failed to fetch incoming likes: code=${result.code}, message=${result.message}")
                 }
             }
 

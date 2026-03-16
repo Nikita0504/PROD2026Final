@@ -29,8 +29,7 @@ fun AppRoot(
             is SessionState.Debug -> MainNavGraph()
         }
 
-        // Debug-панель поверх текущего графа, без выкидывания его из композиции
-        if (debugPanelVisible && (sessionState is SessionState.Authorized || sessionState is SessionState.Onboarding)) {
+        if (debugPanelVisible) {
             DebugNavGraph(onClose = { rootViewModel.closeDebugPanel() })
         }
     }

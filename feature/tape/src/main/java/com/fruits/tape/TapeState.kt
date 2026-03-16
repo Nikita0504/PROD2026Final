@@ -23,4 +23,6 @@ data class TapeState(
     val error: String? = null,
     /** Пустой по умолчанию; при появлении бэка — юзкейс и заполнение */
     val likedCards: List<TapeCardItem> = emptyList(),
+    val likedIsLoading: Boolean = false,
+    val likedError: String? = null,
 )

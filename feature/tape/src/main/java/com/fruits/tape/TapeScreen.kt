@@ -133,7 +133,29 @@ private fun TapeScreen(
             ) {
                 when (state.selectedTab) {
                     TapeTab.Liked -> {
-                        if (state.likedCards.isEmpty()) {
+                        if (state.likedIsLoading) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else if (state.likedError != null) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                TapeErrorTitle()
+                                Spacer(Modifier.height(12.dp))
+                                TapeRetryButton(onRetryClick = { onEvent(TapeEvent.OnTabSelected(TapeTab.Liked)) })
+                            }
+                        } else if (state.likedCards.isEmpty()) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -154,9 +176,27 @@ private fun TapeScreen(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                TapeLikedEmptyTitle()
-                                Spacer(Modifier.height(8.dp))
-                                TapeLikedEmptySubtitle()
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                ) {
+                                    state.likedCards.forEach { card ->
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(cardHeight)
+                                        ) {
+                                            TapeCardContent(
+                                                name = card.name,
+                                                age = card.age,
+                                                city = card.city,
+                                                imageUrl = card.imageUrl,
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

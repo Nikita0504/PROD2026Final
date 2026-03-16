@@ -3,9 +3,11 @@ package com.fruits.tape
 import com.fruits.logger.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.model.interactions.UserAction
 import com.fruits.domain.repository.ImageUploadUrlRepository
+import com.fruits.domain.usecase.interactions.GetIncomingLikesUseCase
 import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
 import com.fruits.tape.components.swipe_card.SwipeDirection
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 
 class TapeViewModel(
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
+    private val getIncomingLikesUseCase: GetIncomingLikesUseCase,
     private val sendUserActionUseCase: SendUserActionUseCase,
     private val imageUploadUrlRepository: ImageUploadUrlRepository,
 ) : ViewModel() {
@@ -38,7 +41,12 @@ class TapeViewModel(
 
     fun onEvent(event: TapeEvent) {
         when (event) {
-            is TapeEvent.OnTabSelected -> _state.update { it.copy(selectedTab = event.tab) }
+            is TapeEvent.OnTabSelected -> {
+                _state.update { it.copy(selectedTab = event.tab) }
+                if (event.tab == TapeTab.Liked && _state.value.likedCards.isEmpty() && !_state.value.likedIsLoading) {
+                    loadLiked()
+                }
+            }
             TapeEvent.OnWhyClicked -> _state.value.currentCard?.let {
                 viewModelScope.launch { _effects.emit(TapeEffect.ShowReasonSheet(it.reasonInFeed)) }
             }
@@ -128,6 +136,44 @@ class TapeViewModel(
         }
     }
 
+    private fun loadLiked() {
+        viewModelScope.launch {
+            _state.update { it.copy(likedIsLoading = true, likedError = null) }
+            getIncomingLikesUseCase()
+                .onSuccess { list ->
+                    Log.d(TAG, "=== Loaded ${list.size} incoming likes ===")
+                    list.forEachIndexed { i, r ->
+                        Log.d(TAG, "[$i] ${r.firstName} ${r.secondName}, age=${r.age}, city=${r.city}")
+                        Log.d(TAG, "[$i] imageKeys=${r.photoFileKeys}")
+                    }
+                    val photoKeys = list.mapNotNull { it.photoFileKeys.firstOrNull() }.distinct()
+                    val urlMap = if (photoKeys.isEmpty()) emptyMap()
+                    else imageUploadUrlRepository.getDownloadUrls(photoKeys)
+                        .getOrNull()
+                        ?.associate { it.key to it.url }
+                        ?: emptyMap()
+
+                    val cards = list.map { it.toLikedCardItem(urlMap) }
+                    _state.update {
+                        it.copy(
+                            likedIsLoading = false,
+                            likedCards = cards,
+                            likedError = null,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Failed to load incoming likes: ${error.message}")
+                    _state.update {
+                        it.copy(
+                            likedIsLoading = false,
+                            likedError = error.message,
+                        )
+                    }
+                }
+        }
+    }
+
     companion object {
         private const val TAG = "TapeViewModel"
     }
@@ -141,4 +187,14 @@ private fun Recommendations.toCardItem(urlMap: Map<String, String>) = TapeCardIt
     imageUrl = photoFileKeys.firstOrNull()?.let { urlMap[it] } ?: "",
     reasonInFeed = explanation,
     about = description
+)
+
+private fun IncomingLike.toLikedCardItem(urlMap: Map<String, String>) = TapeCardItem(
+    userId = likedByUserId,
+    name = "$firstName $secondName",
+    age = age,
+    city = city,
+    imageUrl = photoFileKeys.firstOrNull()?.let { urlMap[it] } ?: "",
+    reasonInFeed = emptyList(),
+    about = description,
 )
