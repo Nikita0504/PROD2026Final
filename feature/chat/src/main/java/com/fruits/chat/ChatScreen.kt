@@ -121,13 +121,6 @@ fun ChatScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TopAppBar(
-                title = { Text(state.chatTitle, modifier = Modifier.testTag("chat_title")) },
-                navigationIcon = {
-                    IconButton(onClick = onBack, modifier = Modifier.testTag("chat_back_button")) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
-                    }
-                }
             ChatTopBar(
                 title = state.chatTitle,
                 avatarUrl = state.counterpartAvatarUrl,

@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
@@ -46,6 +47,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import com.fruits.logger.Log
 import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -195,7 +198,8 @@ private fun ChatListItem(
                     contentDescription = "Avatar of ${chat.name}",
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .testTag("chat_avatar_${chat.id}"),
                     contentScale = ContentScale.Crop,
                     placeholder = personIconPainter,
                     error = personIconPainter,
@@ -206,10 +210,6 @@ private fun ChatListItem(
                             state.result.throwable
                         )
                     },
-                        .clip(CircleShape)
-                        .testTag("chat_avatar_${chat.id}"),
-                    placeholder = messageIconPainter,
-                    error = messageIconPainter
                 )
             } else {
                 Box(
