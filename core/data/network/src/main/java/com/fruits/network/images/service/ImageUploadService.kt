@@ -53,7 +53,6 @@ class ImageService(
         url: String,
         inputStream: InputStream,
         contentType: String = "*/*",
-        onProgress: (Float) -> Unit
     ): ApiResult<Unit> = withContext(Dispatchers.IO) {
         safeCall {
             val bytes = inputStream.readBytes()
@@ -68,7 +67,6 @@ class ImageService(
                 setBody(bytes)
             }
 
-            onProgress(1f)
             Log.d(
                 TAG,
                 "Upload response: ${response.status}, body: ${response.bodyAsText().take(200)}"

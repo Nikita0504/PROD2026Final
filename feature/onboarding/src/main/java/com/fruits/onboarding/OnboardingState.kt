@@ -5,7 +5,6 @@ import android.net.Uri
 data class OnboardingState(
     val description: String = "",
     val selectedImages: List<OnboardingImage> = emptyList(),
-    val uploadingImages: List<UploadingImage> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val isFormValid: Boolean = false
@@ -13,16 +12,13 @@ data class OnboardingState(
 
 data class OnboardingImage(
     val uri: Uri,
-    val serverId: String,
+    val serverId: String? = null,
     val width: Int,
-    val height: Int
-)
-
-data class UploadingImage(
-    val uri: Uri,
-    val progress: Float = 0f,
+    val height: Int,
+    val isLoading: Boolean,
     val errorMessage: String? = null
 )
+
 
 sealed interface OnboardingEvent {
     data class OnDescriptionChanged(val text: String) : OnboardingEvent

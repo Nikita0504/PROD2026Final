@@ -26,11 +26,9 @@ class ImageUploadUrlRepositoryImpl(
     override suspend fun uploadImage(
         url: String,
         inputStream: InputStream,
-        onProgress: (Float) -> Unit
     ): Result<Unit> = service.uploadImageToUrl(
         url,
         inputStream,
-        onProgress = onProgress
     ).mapResult { }
 
     override suspend fun getDownloadUrls(keys: List<String>): Result<List<DownloadUrlData>> {
