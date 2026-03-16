@@ -10,8 +10,7 @@ class UploadImageUseCase(
     private val repository: ImageUploadUrlRepository
 ) {
     operator fun invoke(
-        inputStream: InputStream,
-        onProgress: (Float) -> Unit
+        inputStream: InputStream
     ): Flow<Result<String>> = flow {
         val urlResult = repository.getUploadUrl()
 
@@ -25,9 +24,6 @@ class UploadImageUseCase(
         val uploadResult = repository.uploadImage(
             url = uploadData.url,
             inputStream = inputStream,
-            onProgress = { progress ->
-                onProgress(progress)
-            }
         )
 
         if (uploadResult.isFailure) {

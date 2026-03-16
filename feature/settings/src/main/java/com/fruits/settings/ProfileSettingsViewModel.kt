@@ -200,14 +200,7 @@ class ProfileSettingsViewModel(
             }
 
             try {
-                uploadImageUseCase(inputStream = inputStream, onProgress = { prog ->
-                    _state.update { currentState ->
-                        val updated = currentState.pendingImages.map { img ->
-                            if (img.id == tempId) img.copy(progress = prog) else img
-                        }
-                        currentState.copy(pendingImages = updated)
-                    }
-                }).collect { result ->
+                uploadImageUseCase(inputStream = inputStream).collect { result ->
                     result.onSuccess { serverKey ->
                         val completedImage = ProfileImage(
                             id = serverKey,

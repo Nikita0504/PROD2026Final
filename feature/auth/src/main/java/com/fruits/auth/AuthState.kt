@@ -6,8 +6,20 @@ data class AuthState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 ) {
+    val emailError: String?
+        get() = when {
+            email.isEmpty() -> null
+            !isValidEmail(email) -> "Некорректный email"
+            else -> null
+        }
+
     val canSubmit: Boolean
-        get() = email.isNotBlank() && password.isNotBlank()
+        get() = isValidEmail(email) && password.isNotBlank() && !isLoading
+
+    private fun isValidEmail(email: String): Boolean {
+        val pattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        return pattern.toRegex().matches(email)
+    }
 }
 
 sealed interface AuthEvent {
@@ -19,4 +31,3 @@ sealed interface AuthEvent {
 sealed interface AuthEffect {
     data object NavigateToHome : AuthEffect
 }
-

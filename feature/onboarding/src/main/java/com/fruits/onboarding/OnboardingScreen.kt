@@ -3,7 +3,6 @@ package com.fruits.onboarding
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.ImageNotSupported
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,13 +50,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -144,11 +138,6 @@ private fun OnboardingScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            state.error?.let { error ->
-                ErrorCard(error = error)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
             DescriptionSection(
                 value = state.description,
                 onValueChange = { onEvent(OnboardingEvent.OnDescriptionChanged(it)) }
@@ -158,7 +147,6 @@ private fun OnboardingScreen(
 
             PhotosSection(
                 selectedImages = state.selectedImages,
-                uploadingImages = state.uploadingImages,
                 onRemove = { onEvent(OnboardingEvent.RemoveImage(it)) },
                 onRetry = { onEvent(OnboardingEvent.RetryUpload(it)) },
                 onAddPhoto = { launcher.launch("image/*") }
@@ -166,13 +154,18 @@ private fun OnboardingScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            state.error?.let { error ->
+                ErrorCard(error = error)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             SubmitButton(
                 isLoading = state.isLoading,
                 isEnabled = state.isFormValid && !state.isLoading,
                 onClick = { onEvent(OnboardingEvent.SubmitForm) }
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -234,7 +227,6 @@ private fun DescriptionSection(
 @Composable
 private fun PhotosSection(
     selectedImages: List<OnboardingImage>,
-    uploadingImages: List<UploadingImage>,
     onRemove: (Uri) -> Unit,
     onRetry: (Uri) -> Unit,
     onAddPhoto: () -> Unit
@@ -253,9 +245,7 @@ private fun PhotosSection(
     )
     Spacer(modifier = Modifier.height(16.dp))
 
-    val allImages = selectedImages + uploadingImages
-
-    if (allImages.isNotEmpty()) {
+    if (selectedImages.isNotEmpty()) {
         FlowRow(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -264,22 +254,13 @@ private fun PhotosSection(
             selectedImages.forEach { img ->
                 ImageCard(
                     uri = img.uri,
-                    isLoading = false,
-                    progress = 1f,
-                    onError = null,
-                    onRemove = { onRemove(img.uri) },
-                    modifier = Modifier.width(200.dp).padding(end = 12.dp)
-                )
-            }
-            uploadingImages.forEach { img ->
-                ImageCard(
-                    uri = img.uri,
-                    isLoading = true,
-                    progress = img.progress,
+                    isLoading = img.isLoading,
                     onError = img.errorMessage,
                     onRemove = { onRemove(img.uri) },
                     onRetry = { onRetry(img.uri) },
-                    modifier = Modifier.width(200.dp).padding(end = 12.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(end = 12.dp)
                 )
             }
         }
@@ -352,7 +333,6 @@ private fun SubmitButton(
 private fun ImageCard(
     uri: Uri,
     isLoading: Boolean,
-    progress: Float,
     onError: String?,
     onRemove: () -> Unit,
     onRetry: (() -> Unit)? = null,
@@ -378,14 +358,14 @@ private fun ImageCard(
 
         if (isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(
-                        progress = { progress },
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
                         color = MaterialTheme.colorScheme.primary
@@ -405,21 +385,29 @@ private fun ImageCard(
             }
         }
 
-        IconButton(
-            onClick = onRemove,
+
+        Box(
+            contentAlignment = Alignment.TopEnd,
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .background(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                    shape = CircleShape
-                )
+                .fillMaxSize()
+                .padding(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Удалить",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(22.dp)
-            )
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Удалить",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
         }
 
         if (onError != null) {

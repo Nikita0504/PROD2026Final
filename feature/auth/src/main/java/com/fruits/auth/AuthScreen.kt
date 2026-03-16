@@ -2,8 +2,10 @@ package com.fruits.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,6 +64,8 @@ fun AuthScreen(
                 label = { Text("Email") },
                 singleLine = true,
                 enabled = !state.isLoading,
+                isError = state.emailError != null,
+                supportingText = state.emailError?.let { { Text(it) } },
             )
 
             OutlinedTextField(
@@ -83,19 +87,21 @@ fun AuthScreen(
                     .padding(top = 24.dp)
                     .testTag("login_button"),
                 onClick = { onEvent(AuthEvent.LoginClicked) },
-                enabled = state.canSubmit && !state.isLoading,
+                enabled = state.canSubmit,
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .testTag("login_progress"),
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Text("Войти")
-                }
+                Text("Войти")
             }
+
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .testTag("login_progress"),
+                    strokeWidth = 2.dp,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (state.errorMessage != null) {
                 Text(

@@ -9,7 +9,6 @@ interface ImageUploadUrlRepository {
     suspend fun uploadImage(
         url: String,
         inputStream: InputStream,
-        onProgress: (Float) -> Unit
     ): Result<Unit>
 
     suspend fun getDownloadUrls(keys: List<String>): Result<List<DownloadUrlData>>

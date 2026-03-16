@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.io.InputStream
 
 private const val MAX_IMAGES = 5
 private const val MIN_IMAGE_SIZE = 256
@@ -44,6 +45,7 @@ class OnboardingViewModel(
                     validateForm()
                 }
             }
+
             is OnboardingEvent.PickImage -> validateAndStartUpload(event.uri)
             is OnboardingEvent.RemoveImage -> removeImage(event.uri)
             is OnboardingEvent.RetryUpload -> validateAndStartUpload(event.uri)
@@ -58,14 +60,13 @@ class OnboardingViewModel(
     }
 
     private fun validateAndStartUpload(uri: Uri) {
-        val totalImages = _state.value.selectedImages.size + _state.value.uploadingImages.size
+        val totalImages = _state.value.selectedImages.size
         if (totalImages >= MAX_IMAGES) {
             _effect.trySend(OnboardingEffect.ShowError("Максимум $MAX_IMAGES фотографий"))
             return
         }
 
-        if (_state.value.selectedImages.any { it.uri == uri } ||
-            _state.value.uploadingImages.any { it.uri == uri }) {
+        if (_state.value.selectedImages.any { it.uri == uri }) {
             return
         }
 
@@ -77,10 +78,12 @@ class OnboardingViewModel(
                     _effect.trySend(OnboardingEffect.ShowError("Минимальный размер фото ${MIN_IMAGE_SIZE}x${MIN_IMAGE_SIZE}"))
                     return@launch
                 }
+
                 dimensions.first > MAX_IMAGE_SIZE || dimensions.second > MAX_IMAGE_SIZE -> {
                     _effect.trySend(OnboardingEffect.ShowError("Максимальный размер фото ${MAX_IMAGE_SIZE}x${MAX_IMAGE_SIZE}"))
                     return@launch
                 }
+
                 else -> startUpload(uri, dimensions)
             }
         }
@@ -89,36 +92,31 @@ class OnboardingViewModel(
     private fun startUpload(uri: Uri, dimensions: Pair<Int, Int>) {
         _state.update {
             it.copy(
-                uploadingImages = it.uploadingImages + UploadingImage(uri = uri, progress = 0f)
+                selectedImages = it.selectedImages + OnboardingImage(
+                    uri = uri,
+                    isLoading = true,
+                    width = dimensions.first,
+                    height = dimensions.second,
+                )
             )
         }
 
         viewModelScope.launch {
-            var inputStream: java.io.InputStream? = null
+            var inputStream: InputStream? = null
             try {
                 inputStream = application.contentResolver.openInputStream(uri)
                     ?: throw IOException("Failed to open input stream for URI: $uri")
 
-                uploadImageUseCase(inputStream = inputStream, onProgress = { progress ->
-                    _state.update { currentState ->
-                        val updatedList = currentState.uploadingImages.map { img ->
-                            if (img.uri == uri) img.copy(progress = progress) else img
-                        }
-                        currentState.copy(uploadingImages = updatedList)
-                    }
-                }).collect { result ->
+                uploadImageUseCase(inputStream = inputStream).collect { result ->
                     result.onSuccess { serverId ->
-                        val completedImage = OnboardingImage(
-                            uri = uri,
-                            serverId = serverId,
-                            width = dimensions.first,
-                            height = dimensions.second
-                        )
-
                         _state.update { currentState ->
                             currentState.copy(
-                                selectedImages = currentState.selectedImages + completedImage,
-                                uploadingImages = currentState.uploadingImages.filter { it.uri != uri }
+                                selectedImages = currentState.selectedImages.map {
+                                    if (it.uri == uri) it.copy(
+                                        isLoading = false,
+                                        serverId = serverId
+                                    ) else it
+                                },
                             )
                         }
                         validateForm()
@@ -144,10 +142,10 @@ class OnboardingViewModel(
         }
 
         _state.update { currentState ->
-            val updatedList = currentState.uploadingImages.map { img ->
-                if (img.uri == uri) img.copy(errorMessage = errorMsg) else img
+            val updatedList = currentState.selectedImages.map { img ->
+                if (img.uri == uri) img.copy(errorMessage = errorMsg, isLoading = false) else img
             }
-            currentState.copy(uploadingImages = updatedList)
+            currentState.copy(selectedImages = updatedList)
         }
     }
 
@@ -155,7 +153,6 @@ class OnboardingViewModel(
         _state.update {
             it.copy(
                 selectedImages = it.selectedImages.filter { img -> img.uri != uri },
-                uploadingImages = it.uploadingImages.filter { img -> img.uri != uri }
             )
         }
         validateForm()
@@ -170,7 +167,7 @@ class OnboardingViewModel(
 
         viewModelScope.launch {
             try {
-                val imageIds = _state.value.selectedImages.map { it.serverId }
+                val imageIds = _state.value.selectedImages.map { it.serverId!! }
                 val description = _state.value.description
 
                 val result = sessionManager.onboard(
@@ -201,8 +198,8 @@ class OnboardingViewModel(
                 currentState.selectedImages.size <= MAX_IMAGES &&
                 currentState.description.isNotBlank() &&
                 currentState.description.length <= 256 &&
-                currentState.uploadingImages.none { it.errorMessage != null } &&
-                currentState.uploadingImages.isEmpty()
+                currentState.selectedImages.none { it.errorMessage != null } &&
+                currentState.selectedImages.none { it.isLoading }
 
         _state.update { it.copy(isFormValid = isValid) }
     }
