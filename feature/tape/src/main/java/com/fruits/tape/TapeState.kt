@@ -21,8 +21,8 @@ data class TapeState(
     val isLoading: Boolean = false,
     val isEmpty: Boolean = false,
     val error: String? = null,
-    /** Пустой по умолчанию; при появлении бэка — юзкейс и заполнение */
-    val likedCards: List<TapeCardItem> = emptyList(),
+    val likedCurrentCard: TapeCardItem? = null,
     val likedIsLoading: Boolean = false,
+    val likedIsEmpty: Boolean = false,
     val likedError: String? = null,
 )

@@ -1,5 +1,9 @@
 package com.fruits.debug
 
+import com.fruits.domain.model.chat.Chat
+import com.fruits.domain.model.chat.ChatDetail
+import com.fruits.domain.model.chat.ChatMessage
+import com.fruits.domain.model.chat.SentMessage
 import com.fruits.domain.model.image.UploadingData
 import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.recommendations.Recommendations
@@ -7,9 +11,9 @@ import com.fruits.domain.model.user.Tokens
 import com.fruits.domain.model.user.User
 import com.fruits.domain.model.user.UserProfileUpdate
 
-class MockDataService {
+class MockDataService : DebugMockData {
 
-    var userMock: User = User(
+    override var userMock: User = User(
         id = "test",
         firstName = "Test",
         secondName = "User",
@@ -18,22 +22,22 @@ class MockDataService {
         readyToGive = true
     )
 
-    var tokensMock: Tokens = Tokens(
+    override var tokensMock: Tokens = Tokens(
         accessToken = "test_access_token",
         refreshToken = "test_refresh_token"
     )
 
-    var userProfileUpdateMock: UserProfileUpdate = UserProfileUpdate(
+    override var userProfileUpdateMock: UserProfileUpdate = UserProfileUpdate(
         description = "Test description",
         photoFilesKeys = emptyList()
     )
 
-    var uploadingDataMock: UploadingData = UploadingData(
+    override var uploadingDataMock: UploadingData = UploadingData(
         url = "https://mock-upload.test/image",
         key = "mock_file_key",
     )
 
-    var incomingLikes: List<IncomingLike> = listOf(
+    override var incomingLikes: List<IncomingLike> = listOf(
         IncomingLike(
             likedByUserId = "user_201",
             firstName = "Анна",
@@ -56,7 +60,7 @@ class MockDataService {
         ),
     )
 
-    var recommendations: List<Recommendations> = listOf(
+    override var recommendations: List<Recommendations> = listOf(
         Recommendations(
             userId = "user_101",
             firstName = "Алексей",
@@ -129,24 +133,129 @@ class MockDataService {
         )
     )
 
-    fun updateRecommendations(block: MutableList<Recommendations>.() -> Unit) {
+    override fun updateRecommendations(block: MutableList<Recommendations>.() -> Unit) {
         recommendations = recommendations.toMutableList().apply(block)
     }
 
-    fun updateUser(block: User.() -> User) {
+    override fun updateUser(block: User.() -> User) {
         userMock = userMock.block()
     }
 
-    fun updateTokens(block: Tokens.() -> Tokens) {
+    override fun updateTokens(block: Tokens.() -> Tokens) {
         tokensMock = tokensMock.block()
     }
 
-    fun updateUserProfileUpdate(block: UserProfileUpdate.() -> UserProfileUpdate) {
+    override fun updateUserProfileUpdate(block: UserProfileUpdate.() -> UserProfileUpdate) {
         userProfileUpdateMock = userProfileUpdateMock.block()
     }
 
-
-    fun uploadingDataMockUpdate(block: UploadingData.() -> UploadingData) {
+    override fun uploadingDataMockUpdate(block: UploadingData.() -> UploadingData) {
         uploadingDataMock = uploadingDataMock.block()
     }
+
+    // region Chat mocks
+
+    override var chats: List<Chat> = listOf(
+        Chat(
+            id = "chat_101",
+            name = "Алексей Смирнов",
+            lastMessage = "Привет! Как урожай?",
+            timestamp = 1_742_000_000_000L,
+            unreadCount = 2,
+            avatarUrl = null,
+        ),
+        Chat(
+            id = "chat_102",
+            name = "Мария Иванова",
+            lastMessage = "Заберу яблоки вечером",
+            timestamp = 1_742_000_500_000L,
+            unreadCount = 0,
+            avatarUrl = null,
+        ),
+    )
+
+    private val _chatDetails: MutableMap<String, ChatDetail> = mutableMapOf(
+        "chat_101" to ChatDetail(
+            id = "chat_101",
+            title = "Алексей Смирнов",
+            status = "active",
+            messages = listOf(
+                ChatMessage(
+                    id = "msg_1",
+                    senderUserId = "user_101",
+                    text = "Привет! Как урожай?",
+                    createdAt = "2025-03-01T10:15:00Z",
+                ),
+                ChatMessage(
+                    id = "msg_2",
+                    senderUserId = "me",
+                    text = "Привет, отличный! Есть много яблок.",
+                    createdAt = "2025-03-01T10:16:00Z",
+                ),
+            ),
+            createdAt = "2025-03-01T10:00:00Z",
+            updatedAt = "2025-03-01T10:16:00Z",
+        ),
+        "chat_102" to ChatDetail(
+            id = "chat_102",
+            title = "Мария Иванова",
+            status = "active",
+            messages = listOf(
+                ChatMessage(
+                    id = "msg_3",
+                    senderUserId = "user_102",
+                    text = "Заберу яблоки вечером",
+                    createdAt = "2025-03-02T18:30:00Z",
+                ),
+            ),
+            createdAt = "2025-03-02T18:00:00Z",
+            updatedAt = "2025-03-02T18:30:00Z",
+        ),
+    )
+
+    override val chatDetails: Map<String, ChatDetail>
+        get() = _chatDetails
+
+    override fun appendChatMessage(chatId: String, text: String): SentMessage {
+        val createdAt = "2025-03-03T12:00:00Z"
+        val newId = "msg_${System.currentTimeMillis()}"
+        val sent = SentMessage(
+            id = newId,
+            createdAt = createdAt,
+        )
+
+        val detail = _chatDetails[chatId]
+        if (detail != null) {
+            val newMessage = ChatMessage(
+                id = newId,
+                senderUserId = "me",
+                text = text,
+                createdAt = createdAt,
+            )
+            _chatDetails[chatId] = detail.copy(
+                messages = detail.messages + newMessage,
+                updatedAt = createdAt,
+            )
+        }
+
+        // Обновляем lastMessage в списке чатов
+        chats = chats.map { chat ->
+            if (chat.id == chatId) {
+                chat.copy(
+                    lastMessage = text,
+                    timestamp = System.currentTimeMillis(),
+                    unreadCount = 0,
+                )
+            } else chat
+        }
+
+        return sent
+    }
+
+    override fun deleteChat(chatId: String) {
+        chats = chats.filterNot { it.id == chatId }
+        _chatDetails.remove(chatId)
+    }
+
+    // endregion
 }

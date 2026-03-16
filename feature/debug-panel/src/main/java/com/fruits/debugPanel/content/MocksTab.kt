@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fruits.debugPanel.content.mockblock.ChatsMockBlock
 import com.fruits.debugPanel.content.mockblock.TokensMockBlock
 import com.fruits.debugPanel.content.mockblock.UserMockBlock
 
@@ -28,6 +29,7 @@ fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
     val userState by vm.userState.collectAsStateWithLifecycle()
     val tokensState by vm.tokensState.collectAsStateWithLifecycle()
     val recommendationsState by vm.recommendationsState.collectAsStateWithLifecycle()
+    val chatsState by vm.chatsState.collectAsStateWithLifecycle()
 
 
     Column(
@@ -68,6 +70,13 @@ fun MocksTab(vm: DebugPanelViewModel, mockEnabled: Boolean) {
             enabled = mockEnabled,
             onStateChange = vm::updateRecommendationState,
             onSave = vm::saveRecommendationsMock
+        )
+
+        ChatsMockBlock(
+            states = chatsState,
+            enabled = mockEnabled,
+            onStateChange = vm::updateChatState,
+            onSave = vm::saveChatsMock,
         )
     }
 }

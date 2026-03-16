@@ -95,7 +95,7 @@ class InteractionsService(
             Log.d(TAG, "Requesting incoming likes, token present: ${accessToken.isNotBlank()}")
 
             val result: ApiResult<List<IncomingLikeSchema>> =
-                client.get("$baseUrl/interactions/incoming-likes") {
+                client.get("$baseUrl/interactions/incoming_likes") {
                     header(HttpHeaders.Authorization, "Bearer $accessToken")
                 }.toApiResult(
                     401 to "Пользователь не авторизован",

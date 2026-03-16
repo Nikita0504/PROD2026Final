@@ -1,15 +1,25 @@
 package com.fruits.prod2026final.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DynamicFeed
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.DynamicFeed
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -18,10 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,125 +48,138 @@ import com.fruits.settings.ProfileSettingsRoute
 import com.fruits.tape.tapeScreen
 import kotlinx.coroutines.launch
 
+private data class NavItemConfig(
+    val label: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+)
+
 @Composable
 fun MainNavGraph() {
-    Box(
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val showBottomBar = TopLevelRoutes.routes.any { route ->
+        navBackStackEntry?.destination?.hasRoute(route::class) == true
+    }
+
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        val snackbarHostState = remember { SnackbarHostState() }
-        val scope = rememberCoroutineScope()
-
-        val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val showBottomBar = TopLevelRoutes.routes.any { route ->
-            navBackStackEntry?.destination?.hasRoute(route::class) == true
-        }
-
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            bottomBar = {
-                AnimatedVisibility(
-                    visible = showBottomBar,
-                    enter = slideInVertically(initialOffsetY = { it }),
-                    exit = slideOutVertically(targetOffsetY = { it })
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically(animationSpec = tween(300), initialOffsetY = { it }) +
+                        fadeIn(animationSpec = tween(300)),
+                exit = slideOutVertically(animationSpec = tween(300), targetOffsetY = { it }) +
+                        fadeOut(animationSpec = tween(300)),
+            ) {
+                NavigationBar(
+                    tonalElevation = 0.dp,
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ) {
-                    NavigationBar {
-                        TopLevelRoutes.routes.forEach { route ->
-                            val selected = navBackStackEntry?.destination
-                                ?.hierarchy
-                                ?.any { it.hasRoute(route::class) } == true
+                    TopLevelRoutes.routes.forEach { route ->
+                        val selected = navBackStackEntry?.destination
+                            ?.hierarchy
+                            ?.any { it.hasRoute(route::class) } == true
 
-                            NavigationBarItem(
-                                selected = selected,
-                                onClick = {
-                                    if (!selected) {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.startDestinationId) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
-                                },
-                                icon = {
-                                    val (label, letter) = when (route) {
-                                        Route.Tape -> "Лента" to "L"
-                                        Route.Chat -> "Чат" to "C"
-                                        Route.Profile -> "Профиль" to "P"
-                                        else -> "" to "?"
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .clip(androidx.compose.foundation.shape.CircleShape)
-                                            .background(
-                                                if (selected) Color(0xFF4CAF50) else Color(
-                                                    0xFF9E9E9E
-                                                )
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = letter,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    }
-                                },
-                                label = {
-                                    val label = when (route) {
-                                        Route.Tape -> "Лента"
-                                        Route.ChatList -> "Чат"
-                                        Route.Profile -> "Профиль"
-                                        else -> ""
-                                    }
-                                    Text(text = label)
-                                }
+                        val itemConfig = when (route) {
+                            Route.Tape -> NavItemConfig(
+                                label = "Лента",
+                                selectedIcon = Icons.Filled.DynamicFeed,
+                                unselectedIcon = Icons.Outlined.DynamicFeed,
                             )
-                        }
+                            Route.ChatList -> NavItemConfig(
+                                label = "Чаты",
+                                selectedIcon = Icons.Filled.Forum,
+                                unselectedIcon = Icons.Outlined.Forum,
+                            )
+                            Route.Profile -> NavItemConfig(
+                                label = "Профиль",
+                                selectedIcon = Icons.Filled.Person,
+                                unselectedIcon = Icons.Outlined.Person,
+                            )
+                            else -> null
+                        } ?: return@forEach
+
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                if (!selected) {
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (selected) itemConfig.selectedIcon else itemConfig.unselectedIcon,
+                                    contentDescription = itemConfig.label,
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = itemConfig.label,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                    maxLines = 1,
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            ),
+                            alwaysShowLabel = true,
+                        )
                     }
                 }
             }
-        ) { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = Route.Tape,
-                modifier = Modifier.padding(
-                    bottom = if (showBottomBar) padding.calculateBottomPadding() else 0.dp
-                )
-            ) {
-                tapeScreen()
-                chatListScreen(
-                    onNavigateToChatDetail = { chatId ->
-                        navController.navigate(Route.Chat(chatId = chatId))
+        }
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = Route.Tape,
+            modifier = Modifier.padding(
+                bottom = if (showBottomBar) padding.calculateBottomPadding() else 0.dp
+            )
+        ) {
+            tapeScreen()
+            chatListScreen(
+                onNavigateToChatDetail = { chatId ->
+                    navController.navigate(Route.Chat(chatId = chatId))
+                }
+            )
+            chatScreen(
+                onBack = { navController.popBackStack() }
+            )
+            profileScreen(
+                onShowSnackbar = { message ->
+                    scope.launch {
+                        snackbarHostState.showSnackbar(message)
                     }
-                )
-                chatScreen(
-                    onBack = { navController.popBackStack() }
-                )
-                profileScreen(
+                },
+                onNavigateToProfileSettings = {
+                    navController.navigate(Route.ProfileSettings)
+                }
+            )
+            composable<Route.ProfileSettings> {
+                ProfileSettingsRoute(
                     onShowSnackbar = { message ->
                         scope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
                     },
-                    onNavigateToProfileSettings = {
-                        navController.navigate(Route.ProfileSettings)
-                    }
+                    onNavigateBack = { navController.popBackStack() },
                 )
-                composable<Route.ProfileSettings> {
-                    ProfileSettingsRoute(
-                        onShowSnackbar = { message ->
-                            scope.launch {
-                                snackbarHostState.showSnackbar(message)
-                            }
-                        },
-                        onNavigateBack = { navController.popBackStack() },
-                    )
-                }
             }
         }
     }

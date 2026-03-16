@@ -1,7 +1,7 @@
 package com.fruits.repository.image_upload
 
 import com.fruits.domain.model.image.DownloadUrlData
-import com.fruits.debug.MockDataService
+import com.fruits.debug.DebugMockData
 import com.fruits.debug.MockStorage
 import com.fruits.domain.model.image.UploadingData
 import com.fruits.domain.repository.ImageUploadUrlRepository
@@ -15,7 +15,7 @@ import java.io.InputStream
 class ImageUploadUrlRepositoryImpl(
     private val service: ImageService,
     private val mockStorage: MockStorage,
-    private val mockDataService: MockDataService
+    private val mockDataService: DebugMockData
 ) : ImageUploadUrlRepository {
 
     override suspend fun getUploadUrl(): Result<UploadingData> =
