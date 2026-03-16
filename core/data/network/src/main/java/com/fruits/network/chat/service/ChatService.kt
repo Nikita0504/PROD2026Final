@@ -15,7 +15,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 
 class ChatService(
     private val client: HttpClient,
@@ -110,6 +112,7 @@ class ChatService(
 
             val result: ApiResult<SendMessageResponseSchema> = client.post("$baseUrl/$chatId/messages") {
                 header(HttpHeaders.Authorization, "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
                 setBody(SendMessageRequestSchema(text = text))
             }.toApiResult<SendMessageResponseSchema>(
                 401 to "Пользователь не авторизован",

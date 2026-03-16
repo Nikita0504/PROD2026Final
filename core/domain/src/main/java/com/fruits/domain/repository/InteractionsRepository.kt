@@ -1,5 +1,6 @@
 package com.fruits.domain.repository
 
+import com.fruits.domain.model.interactions.AuditEvent
 import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.interactions.ReportReason
 import com.fruits.domain.model.interactions.UserAction
@@ -22,5 +23,9 @@ interface InteractionsRepository {
     suspend fun getIncomingLikes(
         accessToken: String,
     ): Result<List<IncomingLike>>
+
+    suspend fun getAudit(
+        accessToken: String,
+    ): Result<List<AuditEvent>>
 }
 

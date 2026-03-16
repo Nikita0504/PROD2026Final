@@ -4,5 +4,6 @@ enum class UserAction {
     LIKE,
     DISLIKE,
     BLOCK,
+    UNBLOCK,
 }
 

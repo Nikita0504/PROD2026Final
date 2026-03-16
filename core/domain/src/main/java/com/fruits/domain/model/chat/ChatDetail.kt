@@ -7,5 +7,7 @@ data class ChatDetail(
     val messages: List<ChatMessage>,
     val createdAt: String,
     val updatedAt: String,
+    val counterpartUserId: String = "",
+    val counterpartAvatarKey: String? = null,
 )
 

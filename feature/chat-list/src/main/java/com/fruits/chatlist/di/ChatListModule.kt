@@ -9,6 +9,7 @@ val chatListModule = module {
         ChatListViewModel(
             observeChatsUseCase = get(),
             refreshChatsUseCase = get(),
+            imageUploadUrlRepository = get(),
         )
     }
 }

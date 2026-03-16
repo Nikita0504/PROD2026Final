@@ -2,8 +2,11 @@ package com.fruits.chatlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fruits.domain.model.chat.Chat
+import com.fruits.domain.repository.ImageUploadUrlRepository
 import com.fruits.domain.usecase.chat.ObserveChatsUseCase
 import com.fruits.domain.usecase.chat.RefreshChatsUseCase
+import com.fruits.logger.Log
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +19,7 @@ import kotlinx.coroutines.launch
 class ChatListViewModel(
     private val observeChatsUseCase: ObserveChatsUseCase,
     private val refreshChatsUseCase: RefreshChatsUseCase,
+    private val imageUploadUrlRepository: ImageUploadUrlRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChatListState())
@@ -39,8 +43,25 @@ class ChatListViewModel(
     private fun observeChats() {
         viewModelScope.launch {
             observeChatsUseCase().collectLatest { chats ->
-                _state.update { it.copy(chats = chats) }
+                val enriched = enrichWithAvatarUrls(chats)
+                _state.update { it.copy(chats = enriched) }
             }
+        }
+    }
+
+    private suspend fun enrichWithAvatarUrls(chats: List<Chat>): List<Chat> {
+        val keys = chats.mapNotNull { it.avatarFileKey }.distinct()
+        if (keys.isEmpty()) return chats
+
+        val urlMap = imageUploadUrlRepository.getDownloadUrls(keys)
+            .onFailure { Log.w(TAG, "Failed to get avatar download URLs: ${it.message}") }
+            .getOrNull()
+            ?.associate { it.key to it.url }
+            ?: emptyMap()
+
+        return chats.map { chat ->
+            val url = chat.avatarFileKey?.let { urlMap[it] }
+            chat.copy(avatarUrl = url)
         }
     }
 
@@ -78,5 +99,9 @@ class ChatListViewModel(
         viewModelScope.launch {
             _effect.send(ChatListEffect.NavigateToChatDetail(chatId))
         }
+    }
+
+    companion object {
+        private const val TAG = "ChatListViewModel"
     }
 }

@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,8 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import coil3.compose.AsyncImagePainter
+import com.fruits.logger.Log
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -157,9 +160,7 @@ private fun ChatListItem(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-
-    val messageIconPainter = rememberVectorPainter(Icons.Default.Message)
-
+    val personIconPainter = rememberVectorPainter(Icons.Default.Person)
 
     Card(
         modifier = Modifier
@@ -184,8 +185,16 @@ private fun ChatListItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape),
-                    placeholder = messageIconPainter,
-                    error = messageIconPainter
+                    contentScale = ContentScale.Crop,
+                    placeholder = personIconPainter,
+                    error = personIconPainter,
+                    onError = { state: AsyncImagePainter.State.Error ->
+                        Log.e(
+                            "ChatListScreen",
+                            "Avatar load FAILED: chatId=${chat.id}, url=${chat.avatarUrl}, error=${state.result.throwable}",
+                            state.result.throwable
+                        )
+                    },
                 )
             } else {
                 Box(

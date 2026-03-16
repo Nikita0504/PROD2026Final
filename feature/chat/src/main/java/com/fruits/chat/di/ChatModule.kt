@@ -11,6 +11,11 @@ val chatModule = module {
             savedStateHandle = handle,
             getChatUseCase = get(),
             sendChatMessageUseCase = get(),
+            deleteChatUseCase = get(),
+            sendUserActionUseCase = get(),
+            reportUserUseCase = get(),
+            tokenRepository = get(),
+            imageUploadUrlRepository = get(),
         )
     }
 }

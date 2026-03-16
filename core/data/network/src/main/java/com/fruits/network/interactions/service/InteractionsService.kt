@@ -2,6 +2,7 @@ package com.fruits.network.interactions.service
 
 import com.fruits.logger.Log
 import com.fruits.network.Const
+import com.fruits.network.interactions.schema.AuditEventReadSchema
 import com.fruits.network.interactions.schema.IncomingLikeSchema
 import com.fruits.network.interactions.schema.TargetUserIdSchema
 import com.fruits.network.interactions.schema.UserActionCreateSchema
@@ -36,6 +37,7 @@ class InteractionsService(
             "LIKE" -> "$baseUrl/interactions/likes"
             "DISLIKE" -> "$baseUrl/interactions/dislikes"
             "BLOCK" -> "$baseUrl/interactions/blocks"
+            "UNBLOCK" -> "$baseUrl/interactions/unblocks"
             else -> return@safeCall ApiResult.Error(code = 422, message = "Unknown action: ${request.action}")
         }
 
@@ -109,6 +111,30 @@ class InteractionsService(
                 is ApiResult.Error -> {
                     Log.w(TAG, "Failed to fetch incoming likes: code=${result.code}, message=${result.message}")
                 }
+            }
+
+            result
+        }
+
+    suspend fun getAudit(
+        accessToken: String,
+    ): ApiResult<List<AuditEventReadSchema>> =
+        safeCall {
+            Log.d(TAG, "Requesting audit events, token present: ${accessToken.isNotBlank()}")
+
+            val result: ApiResult<List<AuditEventReadSchema>> =
+                client.get("$baseUrl/interactions/audit") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }.toApiResult(
+                    401 to "Пользователь не авторизован",
+                    503 to "Сервис временно недоступен, попробуйте позже",
+                )
+
+            when (result) {
+                is ApiResult.Success ->
+                    Log.i(TAG, "Audit events fetched: ${result.data.size} items")
+                is ApiResult.Error ->
+                    Log.w(TAG, "Failed to fetch audit events: code=${result.code}, message=${result.message}")
             }
 
             result

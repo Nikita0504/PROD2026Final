@@ -3,6 +3,7 @@ package com.fruits.session
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
+import com.fruits.domain.usecase.interactions.GetAuditEventsUseCase
 import com.fruits.domain.usecase.interactions.GetIncomingLikesUseCase
 import com.fruits.domain.usecase.interactions.ReportUserUseCase
 import com.fruits.domain.usecase.interactions.SendUserActionUseCase
@@ -66,6 +67,7 @@ val sessionModule = module {
 
     singleOf(::GetRecommendationsUseCase)
     singleOf(::GetIncomingLikesUseCase)
+    singleOf(::GetAuditEventsUseCase)
 
     single {
         ObserveChatsUseCase(

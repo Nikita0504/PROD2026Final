@@ -163,6 +163,7 @@ class MockDataService : DebugMockData {
             timestamp = 1_742_000_000_000L,
             unreadCount = 2,
             avatarUrl = null,
+            avatarFileKey = null,
         ),
         Chat(
             id = "chat_102",
@@ -171,6 +172,7 @@ class MockDataService : DebugMockData {
             timestamp = 1_742_000_500_000L,
             unreadCount = 0,
             avatarUrl = null,
+            avatarFileKey = null,
         ),
     )
 
@@ -195,6 +197,8 @@ class MockDataService : DebugMockData {
             ),
             createdAt = "2025-03-01T10:00:00Z",
             updatedAt = "2025-03-01T10:16:00Z",
+            counterpartUserId = "user_101",
+            counterpartAvatarKey = null,
         ),
         "chat_102" to ChatDetail(
             id = "chat_102",
@@ -210,6 +214,8 @@ class MockDataService : DebugMockData {
             ),
             createdAt = "2025-03-02T18:00:00Z",
             updatedAt = "2025-03-02T18:30:00Z",
+            counterpartUserId = "user_102",
+            counterpartAvatarKey = null,
         ),
     )
 

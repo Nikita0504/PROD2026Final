@@ -6,5 +6,6 @@ data class Chat(
     val lastMessage: String,
     val timestamp: Long,
     val unreadCount: Int,
-    val avatarUrl: String?
+    val avatarUrl: String?,
+    val avatarFileKey: String? = null,
 )

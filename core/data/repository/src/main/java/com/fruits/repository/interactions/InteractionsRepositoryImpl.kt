@@ -2,6 +2,7 @@ package com.fruits.repository.interactions
 
 import com.fruits.debug.DebugMockData
 import com.fruits.debug.MockStorage
+import com.fruits.domain.model.interactions.AuditEvent
 import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.interactions.ReportReason
 import com.fruits.domain.model.interactions.UserAction
@@ -11,6 +12,7 @@ import com.fruits.network.interactions.schema.UserReportCreateSchema
 import com.fruits.network.interactions.service.InteractionsService
 import com.fruits.network.util.ApiResult
 import com.fruits.repository.interactions.mapper.toDomain
+import com.fruits.repository.interactions.mapper.toAuditEvent
 import com.fruits.repository.util.mapResult
 import com.fruits.repository.util.mockOr
 
@@ -72,6 +74,19 @@ class InteractionsRepositoryImpl(
                     schema.toDomain()
                 }
             }
+        }
+    }
+
+    override suspend fun getAudit(
+        accessToken: String,
+    ): Result<List<AuditEvent>> {
+        return mockOr(mockStorage, { emptyList<AuditEvent>() }) {
+            val apiResult = service.getAudit(accessToken)
+            if (apiResult is ApiResult.Error) {
+                return@mockOr Result.failure(Exception("[${apiResult.code}] ${apiResult.message}"))
+            }
+            val schemas = (apiResult as ApiResult.Success).data
+            Result.success(schemas.map { it.toAuditEvent() })
         }
     }
 }

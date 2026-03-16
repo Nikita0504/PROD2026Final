@@ -88,13 +88,15 @@ class ChatRepositoryImpl(
 
     private fun ChatListItemSchema.toDomain(): Chat {
         val title = "${counterpart.firstName} ${counterpart.secondName}".trim()
+        val avatarKey = counterpart.photoFileKeys.firstOrNull()
         return Chat(
             id = chatId,
             name = if (title.isBlank()) chatId else title,
             lastMessage = "",
             timestamp = 0L,
             unreadCount = 0,
-            avatarUrl = counterpart.photoFileKeys.firstOrNull(),
+            avatarUrl = null,
+            avatarFileKey = avatarKey,
         )
     }
 
@@ -107,6 +109,8 @@ class ChatRepositoryImpl(
             messages = messages.map { it.toDomain() },
             createdAt = createdAt,
             updatedAt = updatedAt,
+            counterpartUserId = counterpart.userId,
+            counterpartAvatarKey = counterpart.photoFileKeys.firstOrNull(),
         )
     }
 
