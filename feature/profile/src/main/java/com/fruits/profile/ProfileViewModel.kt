@@ -3,7 +3,9 @@ package com.fruits.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fruits.domain.repository.ImageUploadUrlRepository
+import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.usecase.auth.GetProfileUseCase
+import com.fruits.logger.Log
 import com.fruits.session.SessionManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,21 +19,17 @@ class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val sessionManager: SessionManager,
     private val imageUploadUrlRepository: ImageUploadUrlRepository,
+    private val userLocalRepository: UserLocalRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        ProfileState(
-            isLoading = true,
-            error = null,
-            user = null
-        )
-    )
+    private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
 
     private val _effect = Channel<ProfileEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     init {
+        loadCachedUser()
         loadProfile()
     }
 
@@ -42,14 +40,26 @@ class ProfileViewModel(
         }
     }
 
+    private fun loadCachedUser() {
+        viewModelScope.launch {
+            val cachedUser = userLocalRepository.getCachedUser()
+            Log.d("ProfileViewModel", "Cached user: $cachedUser")
+            if (cachedUser != null) {
+                val avatarUrl = resolveAvatarUrl(cachedUser.avatarFileKey)
+                _state.update {
+                    it.copy(
+                        user = cachedUser,
+                        avatarUrl = avatarUrl,
+                        error = null
+                    )
+                }
+            }
+        }
+    }
+
     private fun loadProfile() {
         viewModelScope.launch {
-            val hasUser = _state.value.user != null
-            if (hasUser) {
-                _state.update { it.copy(isRefreshing = true, error = null) }
-            } else {
-                _state.update { it.copy(isLoading = true, error = null) }
-            }
+            _state.update { it.copy(isRefreshing = true, error = null) }
 
             try {
                 getProfileUseCase().collect { result ->
@@ -59,40 +69,33 @@ class ProfileViewModel(
                             it.copy(
                                 user = user,
                                 avatarUrl = avatarUrl,
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = null
+                                error = null,
+                                isRefreshing = false
                             )
                         }
                     }
 
                     result.onFailure { e ->
                         val errorMsg = e.message ?: "Не удалось загрузить профиль"
-                        _state.update {
-                            it.copy(
-                                user = if (hasUser) it.user else null,
-                                avatarUrl = if (hasUser) it.avatarUrl else null,
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = if (hasUser) null else errorMsg
+                        _state.update { currentState ->
+                            currentState.copy(
+                                error = if (currentState.user == null) errorMsg else null,
+                                isRefreshing = false
                             )
                         }
-                        if (!hasUser) {
+                        if (_state.value.user == null) {
                             _effect.send(ProfileEffect.ShowErrorSnackbar(errorMsg))
                         }
                     }
                 }
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(
-                        user = if (hasUser) it.user else null,
-                        avatarUrl = if (hasUser) it.avatarUrl else null,
-                        isLoading = false,
-                        isRefreshing = false,
-                        error = if (hasUser) null else (e.message ?: "Неизвестная ошибка")
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = if (currentState.user == null) e.message else null,
+                        isRefreshing = false
                     )
                 }
-                if (!hasUser) {
+                if (_state.value.user == null) {
                     _effect.send(ProfileEffect.ShowErrorSnackbar(e.message ?: "Неизвестная ошибка"))
                 }
             }

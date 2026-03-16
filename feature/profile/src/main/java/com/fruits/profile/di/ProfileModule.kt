@@ -10,6 +10,7 @@ val profileModule = module {
             getProfileUseCase = get(),
             sessionManager = get(),
             imageUploadUrlRepository = get(),
+            userLocalRepository = get(),
         )
     }
 }

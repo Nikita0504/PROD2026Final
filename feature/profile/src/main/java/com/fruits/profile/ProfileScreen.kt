@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
@@ -26,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import com.fruits.domain.model.user.User
+import com.fruits.logger.Log
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -56,6 +59,7 @@ fun ProfileRoute(
     viewModel: ProfileViewModel = koinViewModel(),
     onShowSnackbar: (String) -> Unit,
     onEditClick: () -> Unit,
+    onAuditClick: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect by viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
@@ -63,6 +67,7 @@ fun ProfileRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            Log.d("ProfileViewModel", "Refresh profile")
             viewModel.onEvent(ProfileEvent.Refresh)
         }
     }
@@ -71,6 +76,7 @@ fun ProfileRoute(
         state = state,
         onEvent = viewModel::onEvent,
         onEditClick = onEditClick,
+        onAuditClick = onAuditClick,
     )
 
     when (val e = effect) {
@@ -85,6 +91,7 @@ fun ProfileScreen(
     state: ProfileState,
     onEvent: (ProfileEvent) -> Unit,
     onEditClick: () -> Unit,
+    onAuditClick: () -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
@@ -110,11 +117,22 @@ fun ProfileScreen(
         }
 
         if (state.user == null) {
-            EmptyState(modifier = Modifier.padding(padding))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
             return@Scaffold
         }
 
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -145,6 +163,7 @@ fun ProfileScreen(
                         containerColor = colorScheme.primary,
                         contentColor = colorScheme.onPrimary,
                     ),
+                    enabled = true,
                 ) {
                     Text(
                         text = "Редактировать профиль",
@@ -154,10 +173,51 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LogoutButton(onClick = { onEvent(ProfileEvent.Logout) })
+                OutlinedButton(
+                    onClick = onAuditClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = colorScheme.onSurface,
+                    ),
+                ) {
+                    Icon(
+                        Icons.Default.History,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "История событий",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                LogoutButton(
+                    onClick = { onEvent(ProfileEvent.Logout) },
+                    enabled = true,
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+
+//            if (state.isRefreshing) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(top = 8.dp),
+//                    contentAlignment = Alignment.TopCenter
+//                ) {
+//                    CircularProgressIndicator(
+//                        modifier = Modifier.size(24.dp),
+//                        strokeWidth = 2.dp,
+//                    )
+//                }
+//            }
         }
     }
 }
@@ -181,31 +241,33 @@ private fun ProfileHeaderCard(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Surface(
-                modifier = Modifier.size(120.dp),
-                shape = CircleShape,
-                color = colorScheme.primaryContainer,
-                tonalElevation = 4.dp,
-            ) {
-                if (avatarUrl != null) {
-                    AsyncImage(
-                        model = avatarUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        onError = { },
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Icons.Default.Person,
+            Box {
+                Surface(
+                    modifier = Modifier.size(120.dp),
+                    shape = CircleShape,
+                    color = colorScheme.primaryContainer,
+                    tonalElevation = 4.dp,
+                ) {
+                    if (avatarUrl != null) {
+                        AsyncImage(
+                            model = avatarUrl,
                             contentDescription = null,
-                            modifier = Modifier.size(56.dp),
-                            tint = colorScheme.onPrimaryContainer,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            onError = { },
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(56.dp),
+                                tint = colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
             }
@@ -278,30 +340,28 @@ private fun ProfileInfoCard(user: User) {
                 }
             }
 
-            user.description?.takeIf { it.isNotBlank() }?.let { description ->
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(
-                        Icons.Default.PersonOutline,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = colorScheme.primary,
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(
+                    Icons.Default.PersonOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "О себе",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colorScheme.onSurfaceVariant,
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "О себе",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colorScheme.onSurface,
-                        )
-                    }
+                    Text(
+                        text = user.description!!,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colorScheme.onSurface,
+                    )
                 }
             }
 
@@ -315,7 +375,6 @@ private fun ProfileInfoCard(user: User) {
         }
     }
 }
-
 
 @Composable
 private fun ErrorState(
@@ -365,30 +424,7 @@ private fun ErrorState(
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                Icons.Default.PersonOutline,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(64.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Данные профиля не найдены",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun LogoutButton(onClick: () -> Unit) {
+private fun LogoutButton(onClick: () -> Unit, enabled: Boolean = true) {
     val colorScheme = MaterialTheme.colorScheme
     OutlinedButton(
         onClick = onClick,
@@ -398,7 +434,8 @@ private fun LogoutButton(onClick: () -> Unit) {
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = colorScheme.error
-        )
+        ),
+        enabled = enabled,
     ) {
         Icon(
             Icons.Default.Logout,

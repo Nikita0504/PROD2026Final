@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml:2:1-4:12
-INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml:2:1-4:12
+ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml:2:13-83
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml:2:13-83
 	package
-		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml
 	xmlns:android
-		ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml:2:11-69
+		ADDED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml:2:23-81
 uses-sdk
-INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml
-INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml reason: use-sdk injection requested
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml
+INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml
 	android:targetSdkVersion
-		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml
 	android:minSdkVersion
-		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/src/main/AndroidManifest.xml
+		INJECTED from /run/media/nikita/SP PC60/projects/kotlin/app/PROD2026final/feature/audit/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest15898542304134915613.xml
