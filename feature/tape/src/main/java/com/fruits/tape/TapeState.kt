@@ -13,6 +13,7 @@ data class TapeCardItem(
     val imageUrl: String,
     val reasonInFeed: List<String>,
     val about: String,
+    val tags: List<String> = emptyList(),
 )
 
 data class TapeState(

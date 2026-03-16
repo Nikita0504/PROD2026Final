@@ -7,11 +7,13 @@ import com.fruits.navigation.Route
 fun NavGraphBuilder.profileScreen(
     onShowSnackbar: (String) -> Unit,
     onNavigateToProfileSettings: () -> Unit,
+    onNavigateToAudit: () -> Unit,
 ) {
     composable<Route.Profile> {
         ProfileRoute(
             onShowSnackbar = onShowSnackbar,
             onEditClick = onNavigateToProfileSettings,
+            onAuditClick = onNavigateToAudit,
         )
     }
 }

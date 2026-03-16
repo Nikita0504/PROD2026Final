@@ -237,7 +237,8 @@ private fun Recommendations.toCardItem(urlMap: Map<String, String>) = TapeCardIt
     city = city,
     imageUrl = photoFileKeys.firstOrNull()?.let { urlMap[it] } ?: "",
     reasonInFeed = explanation,
-    about = description
+    about = description,
+    tags = tags,
 )
 
 private fun IncomingLike.toLikedCardItem(urlMap: Map<String, String>) = TapeCardItem(
@@ -248,4 +249,5 @@ private fun IncomingLike.toLikedCardItem(urlMap: Map<String, String>) = TapeCard
     imageUrl = photoFileKeys.firstOrNull()?.let { urlMap[it] } ?: "",
     reasonInFeed = emptyList(),
     about = description,
+    tags = emptyList(),
 )

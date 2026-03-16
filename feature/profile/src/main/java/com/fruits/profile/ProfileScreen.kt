@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
@@ -58,6 +59,7 @@ fun ProfileRoute(
     viewModel: ProfileViewModel = koinViewModel(),
     onShowSnackbar: (String) -> Unit,
     onEditClick: () -> Unit,
+    onAuditClick: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect by viewModel.effect.collectAsStateWithLifecycle(initialValue = null)
@@ -74,6 +76,7 @@ fun ProfileRoute(
         state = state,
         onEvent = viewModel::onEvent,
         onEditClick = onEditClick,
+        onAuditClick = onAuditClick,
     )
 
     when (val e = effect) {
@@ -88,6 +91,7 @@ fun ProfileScreen(
     state: ProfileState,
     onEvent: (ProfileEvent) -> Unit,
     onEditClick: () -> Unit,
+    onAuditClick: () -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
@@ -163,6 +167,30 @@ fun ProfileScreen(
                     Text(
                         text = "Редактировать профиль",
                         style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = onAuditClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = colorScheme.onSurface,
+                    ),
+                ) {
+                    Icon(
+                        Icons.Default.History,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "История событий",
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
 

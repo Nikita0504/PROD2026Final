@@ -33,6 +33,24 @@ class RecommendationsMapperTest {
         assertEquals(listOf("photo1", "photo2"), recommendations.photoFileKeys)
         assertEquals("Test description", recommendations.description)
         assertEquals(listOf("Explanation 1", "Explanation 2"), recommendations.explanation)
+        assertEquals(emptyList(), recommendations.tags)
+    }
+
+    @Test
+    fun `RecommendationsSchema toDomain maps tags correctly`() {
+        val schema = RecommendationsSchema(
+            userId = "user_1",
+            firstName = "A",
+            secondName = "B",
+            age = 30,
+            city = "City",
+            photoFileKeys = emptyList(),
+            description = "Desc",
+            explanation = emptyList(),
+            tags = listOf("Яблоки", "Фрукты"),
+        )
+        val recommendations = schema.toDomain()
+        assertEquals(listOf("Яблоки", "Фрукты"), recommendations.tags)
     }
 
     @Test

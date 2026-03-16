@@ -2,6 +2,7 @@ package com.fruits.prod2026final
 
 import android.app.Application
 import coil3.ImageLoader
+import com.fruits.audit.di.auditModule
 import com.fruits.auth.di.authModule
 import com.fruits.chat.di.chatModule
 import com.fruits.chatlist.di.chatListModule
@@ -50,6 +51,7 @@ class ProdApplication : Application() {
                 chatModule,
                 profileModule,
                 settingsModule,
+                auditModule,
                 debugModule,
                 debugPanelModule,
                 loggerModule

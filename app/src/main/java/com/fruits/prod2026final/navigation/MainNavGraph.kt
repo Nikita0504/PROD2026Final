@@ -39,6 +39,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fruits.audit.auditScreen
 import com.fruits.chat.chatScreen
 import com.fruits.chatlist.chatListScreen
 import com.fruits.navigation.Route
@@ -169,7 +170,18 @@ fun MainNavGraph() {
                 },
                 onNavigateToProfileSettings = {
                     navController.navigate(Route.ProfileSettings)
+                },
+                onNavigateToAudit = {
+                    navController.navigate(Route.Audit)
                 }
+            )
+            auditScreen(
+                onShowSnackbar = { message ->
+                    scope.launch {
+                        snackbarHostState.showSnackbar(message)
+                    }
+                },
+                onNavigateBack = { navController.popBackStack() },
             )
             composable<Route.ProfileSettings> {
                 ProfileSettingsRoute(

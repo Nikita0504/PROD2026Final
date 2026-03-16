@@ -12,7 +12,8 @@ object RecommendationsMapper {
         city = city,
         photoFileKeys = photoFileKeys,
         description = description,
-        explanation = explanation
+        explanation = explanation,
+        tags = tags,
     )
 
     fun List<RecommendationsSchema>.toDomain(): List<Recommendations> = map { it.toDomain() }

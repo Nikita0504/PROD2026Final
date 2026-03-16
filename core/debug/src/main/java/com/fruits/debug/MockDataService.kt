@@ -69,7 +69,8 @@ class MockDataService : DebugMockData {
             city = "Москва",
             photoFileKeys = listOf("https://s13.stc.yc.kpcdn.net/share/i/12/7888060/wr-960.webp"),
             description = "Свежие яблоки прямо с дачи. Сорт Антоновка, очень сочные. Отдам соседям или всем желающим!",
-            explanation = listOf("Похожие интересы", "Рядом с вами")
+            explanation = listOf("Похожие интересы", "Рядом с вами"),
+            tags = listOf("Яблоки", "Фрукты", "Дача")
         ),
         Recommendations(
             userId = "user_102",
@@ -79,7 +80,8 @@ class MockDataService : DebugMockData {
             city = "Санкт-Петербург",
             photoFileKeys = listOf("https://i.stena.ee/21/2022-02-06_080725.jpg"),
             description = "Урожай клубники — больше, чем ожидала. Вся сладкая, без нитратов. Забирайте бесплатно!",
-            explanation = listOf("Активный пользователь")
+            explanation = listOf("Активный пользователь"),
+            tags = listOf("Клубника", "Ягоды")
         ),
         Recommendations(
             userId = "user_103",
@@ -89,7 +91,8 @@ class MockDataService : DebugMockData {
             city = "Подмосковье",
             photoFileKeys = listOf("https://news.store.rambler.ru/img/2f026387a8b128a22c0490bf57b2cf68?img-format=auto&img-1-resize=height:400,fit:max&img-2-filter=sharpen"),
             description = "Кабачки и огурцы — некуда девать. Выращено без химии на своём огороде.",
-            explanation = listOf("Рядом с вами")
+            explanation = listOf("Рядом с вами"),
+            tags = listOf("Овощи", "Кабачки", "Огурцы", "Органика")
         ),
         Recommendations(
             userId = "user_104",
@@ -99,7 +102,8 @@ class MockDataService : DebugMockData {
             city = "Казань",
             photoFileKeys = listOf("https://cdn.fishki.net/upload/post/2020/05/02/3306035/tn/risunok1.jpg"),
             description = "Домашнее варенье из черники. Сварила с запасом, готова поделиться парой баночек.",
-            explanation = listOf("Похожие интересы", "Популярный пользователь")
+            explanation = listOf("Похожие интересы", "Популярный пользователь"),
+            tags = listOf("Варенье", "Черника", "Заготовки")
         ),
         Recommendations(
             userId = "user_105",
@@ -109,7 +113,8 @@ class MockDataService : DebugMockData {
             city = "Новосибирск",
             photoFileKeys = listOf("https://www.menslife.com/upload/iblock/0d8/realnye_lyudi_obladayushchie_supersposobnostyami.jpg"),
             description = "Груши сорта Конференц — упали с дерева, но целые. Нужно быстро забрать, не будут долго лежать.",
-            explanation = listOf("Рядом с вами")
+            explanation = listOf("Рядом с вами"),
+            tags = listOf("Груши", "Фрукты")
         ),
         Recommendations(
             userId = "user_106",
@@ -119,7 +124,8 @@ class MockDataService : DebugMockData {
             city = "Щёлково",
             photoFileKeys = listOf("https://www.film.ru/sites/default/files/styles/thumb_1024x450/public/trailers_frame/x-men.jpg"),
             description = "Зелень: укроп, петрушка, базилик. Свежесрезанная, пучками. Самовывоз.",
-            explanation = listOf("Активный пользователь")
+            explanation = listOf("Активный пользователь"),
+            tags = listOf("Зелень", "Укроп", "Петрушка", "Базилик")
         ),
         Recommendations(
             userId = "user_108",
@@ -129,7 +135,8 @@ class MockDataService : DebugMockData {
             city = "Краснодар",
             photoFileKeys = listOf("https://ir.ozone.ru/s3/multimedia-p/6651744109.jpg"),
             description = "Персики из Краснодара. Привезли родственники, не осилим. Очень спелые, нужно забрать сегодня.",
-            explanation = listOf("Рядом с вами", "Похожие интересы")
+            explanation = listOf("Рядом с вами", "Похожие интересы"),
+            tags = listOf("Персики", "Фрукты", "Срочно")
         )
     )
 

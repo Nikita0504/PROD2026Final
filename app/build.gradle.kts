@@ -47,4 +47,5 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
     implementation(projects.feature.settings)
+    implementation(projects.feature.audit)
 }
