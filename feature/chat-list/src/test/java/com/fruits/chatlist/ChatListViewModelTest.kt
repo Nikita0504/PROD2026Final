@@ -41,7 +41,7 @@ class ChatListViewModelTest {
         val emptyChatList = emptyList<Chat>()
         every { chatRepository.observeChats() } returns flowOf(emptyChatList)
 
-        viewModel = ChatListViewModel()
+//        viewModel = ChatListViewModel()
     }
 
     @After
