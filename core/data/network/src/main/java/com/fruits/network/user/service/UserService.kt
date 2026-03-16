@@ -27,7 +27,7 @@ class UserService(
         val result = client.post("$baseUrl/auth/login") {
             jsonBody(body)
         }.toApiResult<TokenReadSchema>(
-            403 to "Неверный пароль",
+            401 to "Неверный пароль",
             404 to "Пользователь с таким email не найден",
             422 to "Ошибка валидации данных"
         )

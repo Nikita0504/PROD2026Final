@@ -39,7 +39,7 @@ class SessionManager(
 
         val refreshToken = tokenRepository.getRefreshToken()
         if (refreshToken.isEmpty()) {
-            _sessionState.value = SessionState.Unauthorized()
+            _sessionState.value = SessionState.Unauthorized
             return
         }
 
@@ -48,20 +48,20 @@ class SessionManager(
                 tokenRepository.saveTokens(tokens.accessToken, tokens.refreshToken)
                 val user = userLocalRepository.getCachedUser()
                 _sessionState.value = if (user?.readyToGive == true)
-                    SessionState.Authorized else SessionState.Onboarding()
+                    SessionState.Authorized else SessionState.Onboarding
             }
             .onFailure { error ->
                 val isUnauthorized = error.message?.contains("401") == true
                 if (isUnauthorized) {
                     clearSession()
-                    _sessionState.value = SessionState.Unauthorized()
+                    _sessionState.value = SessionState.Unauthorized
                 } else {
                     val cached = userLocalRepository.getCachedUser()
                     _sessionState.value = if (cached != null) {
                         if (cached.readyToGive) SessionState.Authorized
-                        else SessionState.Onboarding()
+                        else SessionState.Onboarding
                     } else {
-                        SessionState.Unauthorized()
+                        SessionState.Unauthorized
                     }
                 }
             }
@@ -71,8 +71,6 @@ class SessionManager(
 
 
     suspend fun login(email: String, password: String): Result<Unit> {
-        _sessionState.value = SessionState.Loading
-
         // Получаем FCM токен (может быть null если пользователь отказался от уведомлений)
         val fcmToken = getFcmTokenOrNull()
 
@@ -82,12 +80,12 @@ class SessionManager(
                 if (user.readyToGive) {
                     _sessionState.value = SessionState.Authorized
                 } else {
-                    _sessionState.value = SessionState.Onboarding()
+                    _sessionState.value = SessionState.Onboarding
                 }
             }
             .onFailure { error ->
                 Log.d("SessionManager", "Login failed $error")
-                _sessionState.value = SessionState.Unauthorized(error.message)
+                _sessionState.value = SessionState.Unauthorized
             }
         return result.map { }
     }
@@ -111,7 +109,6 @@ class SessionManager(
         description: String,
         imageIds: List<String>
     ): Result<Unit> {
-        _sessionState.value = SessionState.Loading
         return updateProfileUseCase(
             description,
             imageIds
@@ -120,18 +117,18 @@ class SessionManager(
                 if (it.readyToGive) {
                     _sessionState.value = SessionState.Authorized
                 } else {
-                    _sessionState.value = SessionState.Onboarding()
+                    _sessionState.value = SessionState.Onboarding
                 }
             }
             .onFailure {
-                _sessionState.value = SessionState.Onboarding(it.message)
+                _sessionState.value = SessionState.Onboarding
             }
             .map { }
     }
 
     suspend fun logout() {
         clearSession()
-        _sessionState.value = SessionState.Unauthorized()
+        _sessionState.value = SessionState.Unauthorized
     }
 
     private suspend fun clearSession() {
