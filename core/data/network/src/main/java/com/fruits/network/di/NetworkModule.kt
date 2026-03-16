@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import com.fruits.network.BuildConfig
+import com.fruits.network.chat.service.ChatService
 import com.fruits.network.images.service.ImageService
 import com.fruits.network.interactions.service.InteractionsService
 import com.fruits.network.recommendations.service.RecommendationsService
@@ -44,18 +45,7 @@ val networkModule = module {
 
             engine {
                 if (BuildConfig.DEBUG) {
-                    val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-                        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) = Unit
-                        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) = Unit
-                        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-                    })
-
-                    val sslContext = SSLContext.getInstance("SSL").also {
-                        it.init(null, trustAllCerts, SecureRandom())
-                    }
-
                     sslManager = { httpsURLConnection ->
-                        httpsURLConnection.sslSocketFactory = sslContext.socketFactory
                         httpsURLConnection.hostnameVerifier = HostnameVerifier { _, _ -> true }
                     }
                 }
@@ -91,5 +81,6 @@ val networkModule = module {
     singleOf(::ImageService)
     singleOf(::RecommendationsService)
     singleOf(::InteractionsService)
+    singleOf(::ChatService)
 }
 

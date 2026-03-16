@@ -45,4 +45,5 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(projects.feature.settings)
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -46,32 +47,17 @@ fun TapeCardContent(
         )
         Box(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.65f),
+                        ),
                     ),
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-        ) {
-            Column {
-                Text(
-                    text = "$name, $age",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                )
-                Text(
-                    text = city,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 14.sp,
-                )
-            }
-        }
+                ),
+        )
     }
 }
 

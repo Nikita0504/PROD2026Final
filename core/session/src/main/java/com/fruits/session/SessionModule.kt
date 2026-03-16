@@ -3,12 +3,18 @@ package com.fruits.session
 import com.fruits.domain.repository.TokenRepository
 import com.fruits.domain.repository.UserLocalRepository
 import com.fruits.domain.repository.UserNetworkRepository
+import com.fruits.domain.usecase.interactions.GetIncomingLikesUseCase
 import com.fruits.domain.usecase.interactions.ReportUserUseCase
 import com.fruits.domain.usecase.interactions.SendUserActionUseCase
 import com.fruits.domain.usecase.auth.GetProfileUseCase
 import com.fruits.domain.usecase.auth.LoginUseCase
 import com.fruits.domain.usecase.auth.UpdateProfileUseCase
 import com.fruits.domain.usecase.recommendations.GetRecommendationsUseCase
+import com.fruits.domain.usecase.chat.DeleteChatUseCase
+import com.fruits.domain.usecase.chat.GetChatUseCase
+import com.fruits.domain.usecase.chat.ObserveChatsUseCase
+import com.fruits.domain.usecase.chat.RefreshChatsUseCase
+import com.fruits.domain.usecase.chat.SendChatMessageUseCase
 import com.fruits.domain.usecase.image.BatchDownloadImagesUseCase
 import com.fruits.domain.usecase.image.UploadImageUseCase
 import org.koin.core.module.dsl.singleOf
@@ -59,6 +65,41 @@ val sessionModule = module {
     }
 
     singleOf(::GetRecommendationsUseCase)
+    singleOf(::GetIncomingLikesUseCase)
+
+    single {
+        ObserveChatsUseCase(
+            chatRepository = get(),
+        )
+    }
+
+    single {
+        RefreshChatsUseCase(
+            chatRepository = get(),
+            tokenRepository = get(),
+        )
+    }
+
+    single {
+        GetChatUseCase(
+            chatRepository = get(),
+            tokenRepository = get(),
+        )
+    }
+
+    single {
+        DeleteChatUseCase(
+            chatRepository = get(),
+            tokenRepository = get(),
+        )
+    }
+
+    single {
+        SendChatMessageUseCase(
+            chatRepository = get(),
+            tokenRepository = get(),
+        )
+    }
 
     single {
         SendUserActionUseCase(

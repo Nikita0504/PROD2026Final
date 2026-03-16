@@ -7,4 +7,4 @@ suspend fun <T> mockOr(
     mockValue: () -> T,
     realCall: suspend () -> Result<T>
 ): Result<T> = if (mockStorage.enabled) Result.success(mockValue())
-               else realCall()
+else realCall()

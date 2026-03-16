@@ -16,6 +16,7 @@ import com.fruits.network.di.networkModule
 import com.fruits.onboarding.di.onboardingModule
 import com.fruits.prod2026final.di.appModule
 import com.fruits.profile.di.profileModule
+import com.fruits.settings.di.settingsModule
 import com.fruits.repository.di.authRepositoryModule
 import com.fruits.repository.di.imageUploadUrlRepositorModule
 import com.fruits.session.sessionModule
@@ -48,6 +49,7 @@ class ProdApplication : Application() {
                 chatListModule,
                 chatModule,
                 profileModule,
+                settingsModule,
                 debugModule,
                 debugPanelModule,
                 loggerModule

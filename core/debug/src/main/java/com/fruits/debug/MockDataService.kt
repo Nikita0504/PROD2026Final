@@ -1,6 +1,7 @@
 package com.fruits.debug
 
 import com.fruits.domain.model.image.UploadingData
+import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.model.user.Tokens
 import com.fruits.domain.model.user.User
@@ -30,6 +31,29 @@ class MockDataService {
     var uploadingDataMock: UploadingData = UploadingData(
         url = "https://mock-upload.test/image",
         key = "mock_file_key",
+    )
+
+    var incomingLikes: List<IncomingLike> = listOf(
+        IncomingLike(
+            likedByUserId = "user_201",
+            firstName = "Анна",
+            secondName = "Кузнецова",
+            age = 28,
+            city = "Москва",
+            description = "Очень понравились ваши яблоки, хотела бы забрать немного на выходных.",
+            photoFileKeys = listOf("https://example.com/mock/incoming_like_1.jpg"),
+            createdAt = "2025-03-01T10:15:00Z",
+        ),
+        IncomingLike(
+            likedByUserId = "user_202",
+            firstName = "Сергей",
+            secondName = "Михайлов",
+            age = 35,
+            city = "Санкт-Петербург",
+            description = "Интересует ваша клубника, могу подъехать сегодня вечером.",
+            photoFileKeys = listOf("https://example.com/mock/incoming_like_2.jpg"),
+            createdAt = "2025-03-02T14:30:00Z",
+        ),
     )
 
     var recommendations: List<Recommendations> = listOf(

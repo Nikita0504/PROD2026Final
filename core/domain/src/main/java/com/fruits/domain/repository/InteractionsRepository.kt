@@ -1,5 +1,6 @@
 package com.fruits.domain.repository
 
+import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.interactions.ReportReason
 import com.fruits.domain.model.interactions.UserAction
 
@@ -18,6 +19,8 @@ interface InteractionsRepository {
         comment: String?,
     ): Result<Unit>
 
-
+    suspend fun getIncomingLikes(
+        accessToken: String,
+    ): Result<List<IncomingLike>>
 }
 

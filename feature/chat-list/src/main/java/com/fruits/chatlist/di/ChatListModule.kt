@@ -1,9 +1,14 @@
 package com.fruits.chatlist.di
 
 import com.fruits.chatlist.ChatListViewModel
-import org.koin.core.module.dsl.viewModelOf
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val chatListModule = module {
-    viewModelOf(::ChatListViewModel)
+    viewModel {
+        ChatListViewModel(
+            observeChatsUseCase = get(),
+            refreshChatsUseCase = get(),
+        )
+    }
 }

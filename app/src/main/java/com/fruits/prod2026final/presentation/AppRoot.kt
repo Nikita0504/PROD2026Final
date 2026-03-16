@@ -1,7 +1,10 @@
 package com.fruits.prod2026final.presentation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fruits.domain.model.SessionState
 import com.fruits.onboarding.OnboardingRoute
@@ -15,12 +18,19 @@ fun AppRoot(
     rootViewModel: RootViewModel = koinViewModel()
 ) {
     val sessionState by rootViewModel.sessionState.collectAsStateWithLifecycle()
+    val debugPanelVisible by rootViewModel.debugPanelVisible.collectAsStateWithLifecycle()
 
-    when (sessionState) {
-        is SessionState.Loading -> SplashScreen()
-        is SessionState.Unauthorized -> AuthNavGraph()
-        is SessionState.Onboarding -> OnboardingRoute()
-        is SessionState.Authorized -> MainNavGraph()
-        is SessionState.Debug -> DebugNavGraph()
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (sessionState) {
+            is SessionState.Loading -> SplashScreen()
+            is SessionState.Unauthorized -> AuthNavGraph()
+            is SessionState.Onboarding -> OnboardingRoute()
+            is SessionState.Authorized -> MainNavGraph()
+            is SessionState.Debug -> MainNavGraph()
+        }
+
+        if (debugPanelVisible) {
+            DebugNavGraph(onClose = { rootViewModel.closeDebugPanel() })
+        }
     }
 }
