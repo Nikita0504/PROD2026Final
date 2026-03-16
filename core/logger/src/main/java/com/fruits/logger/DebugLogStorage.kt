@@ -15,10 +15,10 @@ object DebugLogStorage {
     fun log(tag: String, message: String) {
         val id = _idCounter.getAndIncrement()
         _logs.update { current ->
-            val mutable = current.toMutableList()
-            if (mutable.size >= MAX) mutable.removeAt(0)
-            mutable.add(LogEntry(id, tag, message, System.currentTimeMillis()))
-            mutable
+            val deque = ArrayDeque(current)
+            if (deque.size >= MAX) deque.removeFirst()
+            deque.addLast(LogEntry(id, tag, message, System.currentTimeMillis()))
+            deque
         }
     }
 

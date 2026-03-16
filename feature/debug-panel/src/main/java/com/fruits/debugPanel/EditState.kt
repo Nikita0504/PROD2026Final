@@ -21,3 +21,10 @@ data class RecommendationMockEditState(
     val explanation: String,
 )
 
+data class ChatMockEditState(
+    val id: String,
+    val name: String,
+    val lastMessage: String,
+    val unreadCount: String,
+)
+

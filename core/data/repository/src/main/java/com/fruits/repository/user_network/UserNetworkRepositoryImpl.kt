@@ -1,6 +1,6 @@
 package com.fruits.repository.user_network
 
-import com.fruits.debug.MockDataService
+import com.fruits.debug.DebugMockData
 import com.fruits.debug.MockStorage
 import com.fruits.domain.model.user.Tokens
 import com.fruits.domain.model.user.User
@@ -16,7 +16,7 @@ import com.fruits.repository.util.mockOr
 class UserNetworkRepositoryImpl(
     private val service: UserService,
     private val mockStorage: MockStorage,
-    private val mockDataService: MockDataService
+    private val mockDataService: DebugMockData
 ) : UserNetworkRepository {
 
     override suspend fun login(email: String, password: String, androidPushToken: String?): Result<Tokens> =

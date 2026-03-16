@@ -30,7 +30,6 @@ fun DebugPanelScreen(
     onClose: (() -> Unit)? = null,
     vm: DebugPanelViewModel = koinViewModel()
 ) {
-    val logs by vm.logs.collectAsStateWithLifecycle()
     val mockEnabled by vm.mockEnabled.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -61,7 +60,12 @@ fun DebugPanelScreen(
                 }
             }
             when (selectedTab) {
-                0 -> LogsTab(logs = logs, onClear = vm::clearLogs)
+                0 -> {
+                    // Подписка на логи только когда активна вкладка — без этого рекомпозиция
+                    // происходила бы на каждый лог даже при открытой вкладке "Моки"
+                    val logs by vm.logs.collectAsStateWithLifecycle()
+                    LogsTab(logs = logs, onClear = vm::clearLogs)
+                }
                 1 -> MocksTab(vm = vm, mockEnabled = mockEnabled)
             }
         }

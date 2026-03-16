@@ -1,5 +1,7 @@
 package com.fruits.repository.chat
 
+import com.fruits.debug.DebugMockData
+import com.fruits.debug.MockStorage
 import com.fruits.domain.model.chat.Chat
 import com.fruits.domain.model.chat.ChatDetail
 import com.fruits.domain.model.chat.ChatMessage
@@ -11,12 +13,15 @@ import com.fruits.network.chat.schema.ChatMessageSchema
 import com.fruits.network.chat.schema.SendMessageResponseSchema
 import com.fruits.network.chat.service.ChatService
 import com.fruits.repository.util.mapResult
+import com.fruits.repository.util.mockOr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ChatRepositoryImpl(
     private val service: ChatService,
+    private val mockStorage: MockStorage,
+    private val mockDataService: DebugMockData,
 ) : ChatRepository {
 
     private val chatsFlow = MutableStateFlow<List<Chat>>(emptyList())
@@ -24,8 +29,10 @@ class ChatRepositoryImpl(
     override fun observeChats(): Flow<List<Chat>> = chatsFlow.asStateFlow()
 
     override suspend fun refreshChats(accessToken: String) {
-        val result = service.getChats(accessToken).mapResult { list ->
-            list.map { it.toDomain() }
+        val result = mockOr(mockStorage, { mockDataService.chats }) {
+            service.getChats(accessToken).mapResult { list ->
+                list.map { it.toDomain() }
+            }
         }
         result.onSuccess { chatsFlow.value = it }
         result.getOrThrow()
@@ -35,18 +42,34 @@ class ChatRepositoryImpl(
         accessToken: String,
         chatId: String,
     ): Result<ChatDetail> {
-        return service
-            .getChat(accessToken, chatId)
-            .mapResult { it.toDomain() }
+        return mockOr(mockStorage, {
+            mockDataService.chatDetails[chatId]
+                ?: ChatDetail(
+                    id = chatId,
+                    title = chatId,
+                    status = "mock",
+                    messages = emptyList(),
+                    createdAt = "2025-03-01T00:00:00Z",
+                    updatedAt = "2025-03-01T00:00:00Z",
+                )
+        }) {
+            service
+                .getChat(accessToken, chatId)
+                .mapResult { it.toDomain() }
+        }
     }
 
     override suspend fun deleteChat(
         accessToken: String,
         chatId: String,
     ): Result<Unit> {
-        return service
-            .deleteChat(accessToken, chatId)
-            .mapResult { Unit }
+        return mockOr(mockStorage, {
+            mockDataService.deleteChat(chatId)
+        }) {
+            service
+                .deleteChat(accessToken, chatId)
+                .mapResult { Unit }
+        }
     }
 
     override suspend fun sendMessage(
@@ -54,9 +77,13 @@ class ChatRepositoryImpl(
         chatId: String,
         text: String,
     ): Result<SentMessage> {
-        return service
-            .sendMessage(accessToken, chatId, text)
-            .mapResult { it.toDomain() }
+        return mockOr(mockStorage, {
+            mockDataService.appendChatMessage(chatId, text)
+        }) {
+            service
+                .sendMessage(accessToken, chatId, text)
+                .mapResult { it.toDomain() }
+        }
     }
 
     private fun ChatListItemSchema.toDomain(): Chat {

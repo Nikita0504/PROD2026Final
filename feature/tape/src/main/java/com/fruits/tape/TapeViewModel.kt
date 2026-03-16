@@ -34,6 +34,7 @@ class TapeViewModel(
     val effects: SharedFlow<TapeEffect> = _effects.asSharedFlow()
 
     private val buffer = ArrayDeque<TapeCardItem>()
+    private val likedBuffer = ArrayDeque<TapeCardItem>()
 
     init {
         loadRecommendations()
@@ -43,7 +44,7 @@ class TapeViewModel(
         when (event) {
             is TapeEvent.OnTabSelected -> {
                 _state.update { it.copy(selectedTab = event.tab) }
-                if (event.tab == TapeTab.Liked && _state.value.likedCards.isEmpty() && !_state.value.likedIsLoading) {
+                if (event.tab == TapeTab.Liked && _state.value.likedCurrentCard == null && !_state.value.likedIsLoading && !_state.value.likedIsEmpty) {
                     loadLiked()
                 }
             }
@@ -55,6 +56,11 @@ class TapeViewModel(
             }
             is TapeEvent.OnCardSwiped -> handleSwipe(event.direction)
             TapeEvent.OnRetry -> loadRecommendations()
+            is TapeEvent.OnLikedCardSwiped -> handleLikedSwipe(event.direction)
+            TapeEvent.OnLikedRetry -> loadLiked()
+            TapeEvent.OnLikedAboutClicked -> _state.value.likedCurrentCard?.let {
+                viewModelScope.launch { _effects.emit(TapeEffect.ShowAboutSheet(it.about)) }
+            }
         }
     }
 
@@ -72,7 +78,7 @@ class TapeViewModel(
 
         if (action != null) {
             viewModelScope.launch {
-                Log.d(TAG, "Sending user action: userId=${current.userId}, action=$action, url:${current.imageUrl} ")
+                Log.d(TAG, "Sending user action: firstName=${current.name}, action=$action, url:${current.imageUrl} ")
                 val result = sendUserActionUseCase(
                     targetUserId = current.userId,
                     action = action,
@@ -88,6 +94,48 @@ class TapeViewModel(
         }
 
         nextCard()
+    }
+
+    private fun handleLikedSwipe(direction: SwipeDirection) {
+        val current = _state.value.likedCurrentCard ?: run {
+            nextLikedCard()
+            return
+        }
+
+        val action = when (direction) {
+            SwipeDirection.RIGHT -> UserAction.LIKE
+            SwipeDirection.LEFT -> UserAction.DISLIKE
+            else -> null
+        }
+
+        if (action != null) {
+            viewModelScope.launch {
+                Log.d(TAG, "Sending liked action: firstName=${current.name}, action=$action")
+                val result = sendUserActionUseCase(
+                    targetUserId = current.userId,
+                    action = action,
+                )
+                result
+                    .onSuccess {
+                        Log.i(TAG, "Liked action sent successfully: userId=${current.userId}, action=$action")
+                    }
+                    .onFailure { error ->
+                        Log.w(TAG, "Failed to send liked action: userId=${current.userId}, action=$action, error=${error.message}")
+                    }
+            }
+        }
+
+        nextLikedCard()
+    }
+
+    private fun nextLikedCard() {
+        val next = likedBuffer.removeFirstOrNull()
+        _state.update {
+            it.copy(
+                likedCurrentCard = next,
+                likedIsEmpty = next == null,
+            )
+        }
     }
 
     private fun nextCard() {
@@ -138,7 +186,8 @@ class TapeViewModel(
 
     private fun loadLiked() {
         viewModelScope.launch {
-            _state.update { it.copy(likedIsLoading = true, likedError = null) }
+            _state.update { it.copy(likedIsLoading = true, likedError = null, likedCurrentCard = null, likedIsEmpty = false) }
+            likedBuffer.clear()
             getIncomingLikesUseCase()
                 .onSuccess { list ->
                     Log.d(TAG, "=== Loaded ${list.size} incoming likes ===")
@@ -153,11 +202,13 @@ class TapeViewModel(
                         ?.associate { it.key to it.url }
                         ?: emptyMap()
 
-                    val cards = list.map { it.toLikedCardItem(urlMap) }
+                    likedBuffer.addAll(list.map { it.toLikedCardItem(urlMap) })
+                    val first = likedBuffer.removeFirstOrNull()
                     _state.update {
                         it.copy(
                             likedIsLoading = false,
-                            likedCards = cards,
+                            likedCurrentCard = first,
+                            likedIsEmpty = first == null,
                             likedError = null,
                         )
                     }

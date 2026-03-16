@@ -20,6 +20,7 @@ android {
 dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.compose.icons.extended)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.koin.android)

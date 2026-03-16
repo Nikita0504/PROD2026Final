@@ -1,6 +1,6 @@
 package com.fruits.repository.interactions
 
-import com.fruits.debug.MockDataService
+import com.fruits.debug.DebugMockData
 import com.fruits.debug.MockStorage
 import com.fruits.domain.model.interactions.IncomingLike
 import com.fruits.domain.model.interactions.ReportReason
@@ -17,7 +17,7 @@ import com.fruits.repository.util.mockOr
 class InteractionsRepositoryImpl(
     private val service: InteractionsService,
     private val mockStorage: MockStorage,
-    private val mockDataService: MockDataService,
+    private val mockDataService: DebugMockData,
 ) : InteractionsRepository {
 
     override suspend fun sendAction(
@@ -30,9 +30,11 @@ class InteractionsRepositoryImpl(
             action = action.name,
         )
 
-        return service
-            .sendAction(accessToken, request)
-            .mapResult { Unit }
+        return mockOr(mockStorage, { Unit }) {
+            service
+                .sendAction(accessToken, request)
+                .mapResult { Unit }
+        }
     }
 
     override suspend fun reportUser(
@@ -47,9 +49,11 @@ class InteractionsRepositoryImpl(
             comment = comment,
         )
 
-        return service
-            .reportUser(accessToken, request)
-            .mapResult { Unit }
+        return mockOr(mockStorage, { Unit }) {
+            service
+                .reportUser(accessToken, request)
+                .mapResult { Unit }
+        }
     }
 
     override suspend fun getIncomingLikes(

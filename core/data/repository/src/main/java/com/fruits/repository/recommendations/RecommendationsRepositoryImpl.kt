@@ -1,6 +1,6 @@
 package com.fruits.repository.recommendations
 
-import com.fruits.debug.MockDataService
+import com.fruits.debug.DebugMockData
 import com.fruits.debug.MockStorage
 import com.fruits.domain.model.recommendations.Recommendations
 import com.fruits.domain.repository.RecommendationsRepository
@@ -14,7 +14,7 @@ import com.fruits.repository.util.mockOr
 class RecommendationsRepositoryImpl(
     private val service: RecommendationsService,
     private val mockStorage: MockStorage,
-    private val mockDataService: MockDataService
+    private val mockDataService: DebugMockData
 ) : RecommendationsRepository {
     override suspend fun getRecommendations(accessToken: String): Result<List<Recommendations>> {
         return mockOr(mockStorage, { mockDataService.recommendations }) {
